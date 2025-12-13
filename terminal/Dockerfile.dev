@@ -1,0 +1,38 @@
+# Development Dockerfile for terminal
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libpq-dev \
+    libsndfile1-dev \
+    portaudio19-dev \
+    python3-pyaudio \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install development dependencies
+COPY requirements.txt requirements-dev.txt
+RUN pip install --no-cache-dir -r requirements-dev.txt || \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY . .
+
+# Install package in development mode
+RUN pip install -e .
+
+# Create app user
+RUN groupadd -r aetherai && useradd -r -g aetherai aetherai
+RUN chown -R aetherai:aetherai /app
+USER aetherai
+
+# Expose development server port
+EXPOSE 8001
+
+# Default command for development
+CMD ["python", "-m", "terminal.main", "--dev", "--host", "0.0.0.0", "--port", "8001"]

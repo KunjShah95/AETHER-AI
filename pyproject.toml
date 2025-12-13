@@ -50,32 +50,30 @@ classifiers = [
     "Typing :: Typed"
 ]
 
-[project.urls]
-Homepage = "https://kunjshah95.github.io/NEXUS-AI.io/"
-Documentation = "https://kunjshah95.github.io/NEXUS-AI.io/docs"
-Repository = "https://github.com/KunjShah95/NEXUS-AI.io.git"
-Issues = "https://github.com/KunjShah95/NEXUS-AI.io/issues"
-Changelog = "https://github.com/KunjShah95/NEXUS-AI.io/blob/main/CHANGELOG.md"
-
 dependencies = [
-    # --- Core AI APIs (at least one required) ---
+    # Core AI APIs (at least one required)
     "google-generativeai>=0.8.0",
     "groq>=0.9.0",
     "openai>=1.30.0",
     "ollama>=0.3.0",
-
-    # --- Interface (TUI & CLI) ---
+    
+    # Interface (TUI & CLI)
     "textual>=0.70.0",
     "rich>=13.7.0",
     "prompt_toolkit>=3.0.43",
-
-    # --- System & Utilities (required) ---
+    
+    # System & Utilities (required)
     "psutil>=6.0.0",
     "python-dotenv>=1.0.0",
     "pyyaml>=6.0.1",
     "requests>=2.32.0",
     "typing-extensions>=4.12.0",
     "pydantic>=2.7.0",
+    
+    # Common optional dependencies
+    "numpy>=1.24.0",
+    "pillow>=10.0.0",
+    "docker>=7.1.0",
 ]
 
 [project.optional-dependencies]
@@ -86,7 +84,6 @@ dev = [
     "flake8>=7.0.0",
     "mypy>=1.10.0",
     "ruff>=0.4.0",
-    "scikit-learn>=1.5.0",
     "pytest-cov>=4.1.0",
     "pytest-xdist>=3.5.0",
     "pytest-html>=4.1.1",
@@ -94,14 +91,7 @@ dev = [
     "pre-commit>=3.7.0",
 ]
 
-# Database integrations
-db = [
-    "psycopg2-binary>=2.9.9",
-    "mysql-connector-python>=8.2.0",
-    "pymongo>=4.6.1",
-]
-
-# Voice and audio features
+# Voice features
 voice = [
     "SpeechRecognition>=3.10.0",
     "pyttsx3>=2.90",
@@ -110,76 +100,47 @@ voice = [
     "pyaudio>=0.2.14",
 ]
 
-# Clipboard support
-clipboard = [
-    "pyperclip>=1.8.2",
-]
-
-# Web search and URL fetching
+# Web search and scraping
 web = [
     "duckduckgo-search>=6.0.0",
     "html2text>=2024.2.26",
     "beautifulsoup4>=4.12.3",
 ]
 
-# RAG and knowledge base features
+# RAG and knowledge base
 rag = [
     "chromadb>=1.1.1",
     "sentence-transformers>=2.7.0",
     "PyPDF2>=3.0.1",
-    "beautifulsoup4>=4.12.3",
 ]
 
-# Heavy ML/Transformers (HuggingFace models)
-ml = [
-    "transformers>=4.41.2",
-    "torch>=2.6.0",
-    "accelerate>=0.30.1",
-    "tokenizers>=0.19.1",
-]
-
-# Web server for API mode
+# Web server
 server = [
     "fastapi>=0.111.0",
     "uvicorn>=0.30.1",
 ]
 
-# System/DevOps tools
-system = [
-    "docker>=7.1.0",
-    "schedule>=1.2.2",
-    "watchdog>=4.0.1",
-]
-
-# Knowledge Base / RAG with embeddings
-kb = [
-    "sentence-transformers>=2.2.0",
-    "numpy>=1.24.0",
-]
-
-# Computer Vision
-vision = [
-    "pillow>=10.0.0",
-]
-
-# Full installation (everything for complete experience like original)
+# Full installation
 full = [
-    "aetherai[voice,rag,ml,server,system,web,clipboard,kb,vision]",
+    "aetherai[voice,rag,server,web]",
 ]
 
-# All optional features including dev tools
+# All optional features
 all = [
-    "aetherai[dev,db,voice,rag,ml,server,system,web,clipboard,kb,vision]",
+    "aetherai[dev,voice,rag,server,web]",
 ]
-
 
 [project.scripts]
 aetherai = "terminal.main:main"
 nexus-ai = "terminal.main:main"
 
-# ============================================================================
-# Setuptools Configuration
-# ============================================================================
+[project.urls]
+Homepage = "https://kunjshah95.github.io/NEXUS-AI.io/"
+Documentation = "https://kunjshah95.github.io/NEXUS-AI.io/docs"
+Repository = "https://github.com/KunjShah95/NEXUS-AI.io.git"
+Issues = "https://github.com/KunjShah95/NEXUS-AI.io/issues"
+Changelog = "https://github.com/KunjShah95/NEXUS-AI.io/blob/main/CHANGELOG.md"
+
 [tool.setuptools]
 include-package-data = true
 zip-safe = false
@@ -187,27 +148,20 @@ zip-safe = false
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["terminal*"]
-exclude = ["tests*", "docs*", "frontend*", "extension*", "go-terminal*", "documentation-site*"]
-
-[tool.setuptools.package-data]
-terminal = ["py.typed", "*.yaml", "*.json", "*.txt"]
-
-# ============================================================================
-# UV Package Manager Configuration (for fast installs)
-# ============================================================================
-[tool.uv]
-dev-dependencies = [
-    "pytest>=8.2.2",
-    "black>=24.4.2",
-    "flake8>=7.0.0",
-    "mypy>=1.10.0",
-    "ruff>=0.4.0",
-    "pre-commit>=3.7.0",
+exclude = [
+    "tests*", 
+    "docs*", 
+    "frontend*", 
+    "extension*", 
+    "documentation-site*",
+    "__pycache__",
+    "*.pyc",
+    ".git*"
 ]
 
-# ============================================================================
-# Code Quality Tools Configuration
-# ============================================================================
+[tool.setuptools.package-data]
+terminal = ["py.typed", "*.yaml", "*.json", "*.txt", "*.md"]
+
 [tool.black]
 line-length = 100
 target-version = ['py39', 'py310', 'py311', 'py312', 'py313']

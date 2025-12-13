@@ -1,0 +1,19 @@
+# Core runtime dependencies
+-r requirements.txt
+
+# Development dependencies
+pytest>=8.2.2
+black>=24.4.2
+flake8>=7.0.0
+mypy>=1.10.0
+ruff>=0.4.0
+pytest-cov>=4.1.0
+pytest-xdist>=3.5.0
+pytest-html>=4.1.1
+pip-audit>=2.6.3
+pre-commit>=3.7.0
+
+# Additional development tools
+ipython>=8.15.0
+jupyter>=1.0.0
+debugpy>=1.7.0

@@ -1,20 +1,13 @@
-.PHONY: help build up down logs shell clean test pypi-build pypi-test pypi-publish
+.PHONY: help install build pypi-build pypi-test pypi-publish dev-install lint format test-py check release-prep
 
 # Default target
 help:
 	@echo "AetherAI Management"
 	@echo "==================="
 	@echo ""
-	@echo "Docker Commands:"
-	@echo "  make build       - Build Docker image"
-	@echo "  make up          - Start containers in detached mode"
-	@echo "  make down        - Stop and remove containers"
-	@echo "  make logs        - View container logs"
-	@echo "  make shell       - Open shell in running container"
-	@echo "  make clean       - Remove containers, volumes, and images"
-	@echo "  make test        - Test Docker image"
-	@echo "  make rebuild     - Clean and rebuild everything"
-	@echo "  make push        - Push image to registry"
+	@echo "Project Setup:"
+	@echo "  make install      - Install the project"
+	@echo "  make build        - Build the frontend"
 	@echo ""
 	@echo "PyPI Publishing:"
 	@echo "  make pypi-build   - Build wheel and sdist"
@@ -28,61 +21,25 @@ help:
 	@echo "  make lint         - Run linters (ruff, black, mypy)"
 	@echo "  make format       - Auto-format code with black"
 	@echo "  make test-py      - Run pytest"
+	@echo "  make check        - Run all checks (lint + test)"
+	@echo "  make release-prep - Full release preparation"
 	@echo ""
 
-# Build Docker image
+# ============================================================================
+# Project Setup
+# ============================================================================
+
+# Install the project
+install:
+	@echo "Installing AetherAI..."
+	python -m pip install -e .
+	@echo "Installation complete!"
+
+# Build frontend
 build:
-	@echo "Building AetherAI Docker image..."
-	docker-compose build --no-cache
-
-# Start containers
-up:
-	@echo "Starting AetherAI containers..."
-	docker-compose up -d
-	@echo "Containers started! Use 'make logs' to view output"
-
-# Stop containers
-down:
-	@echo "Stopping AetherAI containers..."
-	docker-compose down
-
-# View logs
-logs:
-	docker-compose logs -f
-
-# Open shell in container
-shell:
-	docker exec -it aetherai_terminal /bin/bash
-
-# Run the application interactively
-run:
-	docker exec -it aetherai_terminal python terminal/main.py
-
-# Clean up everything
-clean:
-	@echo "Cleaning up Docker resources..."
-	docker-compose down -v --rmi all
-	@echo "Cleanup complete!"
-
-# Test the image
-test:
-	@echo "Testing AetherAI Docker image..."
-	docker-compose run --rm aetherai python -c "import sys; print(f'Python {sys.version}'); sys.exit(0)"
-	@echo "Test passed!"
-
-# Rebuild everything from scratch
-rebuild: clean build up
-
-# Push to registry (requires login)
-push:
-	@echo "Pushing image to GitHub Container Registry..."
-	docker tag aetherai:latest ghcr.io/kunjshah95/aetherai:latest
-	docker push ghcr.io/kunjshah95/aetherai:latest
-
-# Pull from registry
-pull:
-	@echo "Pulling latest image from registry..."
-	docker pull ghcr.io/kunjshah95/aetherai:latest
+	@echo "Building frontend..."
+	cd frontend && npm install && npm run build
+	@echo "Frontend build complete!"
 
 # ============================================================================
 # PyPI Publishing Targets
@@ -160,4 +117,3 @@ check: lint test-py
 release-prep: format lint test-py pypi-check
 	@echo "Release preparation complete!"
 	@echo "Ready to publish with: make pypi-publish"
-

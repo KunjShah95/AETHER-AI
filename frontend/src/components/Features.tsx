@@ -7,9 +7,7 @@ import {
     Palette,
     Code2,
     Plug,
-    Zap,
     Shield,
-    Settings,
 } from "lucide-react";
 
 export function Features() {
@@ -42,7 +40,7 @@ export function Features() {
     );
 }
 
-const FeatureHeader = ({ icon: Icon, color }: { icon: any; color: string }) => (
+const FeatureHeader = ({ icon: Icon, color }: { icon: React.ComponentType<{ className?: string }>; color: string }) => (
     <div className={`flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br ${color} border border-white/[0.1] items-center justify-center`}>
         <Icon className="h-12 w-12 text-white/80" />
     </div>
