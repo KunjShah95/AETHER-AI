@@ -4,76 +4,241 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aetherai"
-version = "0.1.0"
-description = "AetherAI - Interactive terminal assistant"
+version = "1.0.0"
+description = "AetherAI - Production-ready, secure, multi-model AI terminal assistant with RAG, voice, and developer tools"
 readme = "README.md"
 requires-python = ">=3.9"
-authors = [ { name = "Nexus Maintainers" } ]
+authors = [
+    { name = "Kunj Shah", email = "kunjshah.cloudcomputing@gmail.com" }
+]
+maintainers = [
+    { name = "Kunj Shah", email = "kunjshah.cloudcomputing@gmail.com" }
+]
 license = { file = "LICENSE" }
+keywords = [
+    "ai",
+    "terminal",
+    "assistant",
+    "llm",
+    "gemini",
+    "groq",
+    "ollama",
+    "openai",
+    "rag",
+    "voice",
+    "cli",
+    "developer-tools",
+    "code-review",
+    "productivity"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Terminals",
+    "Topic :: Utilities",
+    "Typing :: Typed"
+]
+
+[project.urls]
+Homepage = "https://kunjshah95.github.io/NEXUS-AI.io/"
+Documentation = "https://kunjshah95.github.io/NEXUS-AI.io/docs"
+Repository = "https://github.com/KunjShah95/NEXUS-AI.io.git"
+Issues = "https://github.com/KunjShah95/NEXUS-AI.io/issues"
+Changelog = "https://github.com/KunjShah95/NEXUS-AI.io/blob/main/CHANGELOG.md"
 
 dependencies = [
-    # --- Core AI APIs ---
-    "google-generativeai==0.8.3",
-    "groq==0.9.0",
-    "openai==1.30.1",
-    "ollama==0.3.1",
-
-    # --- RAG & Knowledge Base ---
-    "chromadb==1.1.1",
-    "sentence-transformers==2.7.0",
-    "PyPDF2==3.0.1",
-    "beautifulsoup4==4.12.3",
+    # --- Core AI APIs (at least one required) ---
+    "google-generativeai>=0.8.0",
+    "groq>=0.9.0",
+    "openai>=1.30.0",
+    "ollama>=0.3.0",
 
     # --- Interface (TUI & CLI) ---
-    "textual==0.70.0",
-    "rich==13.7.1",
-    "prompt_toolkit==3.0.43",
+    "textual>=0.70.0",
+    "rich>=13.7.0",
+    "prompt_toolkit>=3.0.43",
 
-    # --- Voice & Audio ---
-    "SpeechRecognition==3.10.0",
-    "pyttsx3==2.90",
-
-    # --- System & Utilities ---
-    "docker==7.1.0",
-    "schedule==1.2.2",
-    "psutil==6.0.0",
-    "python-dotenv==1.0.1",
-    "pyyaml==6.0.1",
-    "requests==2.32.3",
-    "urllib3==2.2.2",
-    "certifi==2024.6.2",
-    "typing-extensions==4.12.2",
-    "pydantic==2.7.4",
-    "watchdog==4.0.1",
-
-    # --- Web Server ---
-    "fastapi==0.111.0",
-    "uvicorn==0.30.1",
-
-    # --- Hugging Face (Optional/Heavy) ---
-    "transformers==4.41.2",
-    "torch==2.6.0",
-    "accelerate==0.30.1",
-    "tokenizers==0.19.1",
+    # --- System & Utilities (required) ---
+    "psutil>=6.0.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0.1",
+    "requests>=2.32.0",
+    "typing-extensions>=4.12.0",
+    "pydantic>=2.7.0",
 ]
 
 [project.optional-dependencies]
+# Development tools
 dev = [
-    "pytest==8.2.2",
-    "black==24.4.2",
-    "flake8==7.0.0",
-    "mypy==1.10.0",
-    "scikit-learn==1.5.0",
-    "pytest-cov==4.1.0",
-    "pytest-xdist==3.5.0",
-    "pytest-html==4.1.1",
-    "pip-audit==2.6.3",
-]
-db = [
-    "psycopg2-binary==2.9.9",
-    "mysql-connector-python==8.2.0",
-    "pymongo==4.6.1",
+    "pytest>=8.2.2",
+    "black>=24.4.2",
+    "flake8>=7.0.0",
+    "mypy>=1.10.0",
+    "ruff>=0.4.0",
+    "scikit-learn>=1.5.0",
+    "pytest-cov>=4.1.0",
+    "pytest-xdist>=3.5.0",
+    "pytest-html>=4.1.1",
+    "pip-audit>=2.6.3",
+    "pre-commit>=3.7.0",
 ]
 
+# Database integrations
+db = [
+    "psycopg2-binary>=2.9.9",
+    "mysql-connector-python>=8.2.0",
+    "pymongo>=4.6.1",
+]
+
+# Voice and audio features
+voice = [
+    "SpeechRecognition>=3.10.0",
+    "pyttsx3>=2.90",
+    "gTTS>=2.5.0",
+    "playsound>=1.3.0",
+    "pyaudio>=0.2.14",
+]
+
+# Clipboard support
+clipboard = [
+    "pyperclip>=1.8.2",
+]
+
+# Web search and URL fetching
+web = [
+    "duckduckgo-search>=6.0.0",
+    "html2text>=2024.2.26",
+    "beautifulsoup4>=4.12.3",
+]
+
+# RAG and knowledge base features
+rag = [
+    "chromadb>=1.1.1",
+    "sentence-transformers>=2.7.0",
+    "PyPDF2>=3.0.1",
+    "beautifulsoup4>=4.12.3",
+]
+
+# Heavy ML/Transformers (HuggingFace models)
+ml = [
+    "transformers>=4.41.2",
+    "torch>=2.6.0",
+    "accelerate>=0.30.1",
+    "tokenizers>=0.19.1",
+]
+
+# Web server for API mode
+server = [
+    "fastapi>=0.111.0",
+    "uvicorn>=0.30.1",
+]
+
+# System/DevOps tools
+system = [
+    "docker>=7.1.0",
+    "schedule>=1.2.2",
+    "watchdog>=4.0.1",
+]
+
+# Knowledge Base / RAG with embeddings
+kb = [
+    "sentence-transformers>=2.2.0",
+    "numpy>=1.24.0",
+]
+
+# Computer Vision
+vision = [
+    "pillow>=10.0.0",
+]
+
+# Full installation (everything for complete experience like original)
+full = [
+    "aetherai[voice,rag,ml,server,system,web,clipboard,kb,vision]",
+]
+
+# All optional features including dev tools
+all = [
+    "aetherai[dev,db,voice,rag,ml,server,system,web,clipboard,kb,vision]",
+]
+
+
 [project.scripts]
-aetherai = "aetherai:main"
+aetherai = "terminal.main:main"
+nexus-ai = "terminal.main:main"
+
+# ============================================================================
+# Setuptools Configuration
+# ============================================================================
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["terminal*"]
+exclude = ["tests*", "docs*", "frontend*", "extension*", "go-terminal*", "documentation-site*"]
+
+[tool.setuptools.package-data]
+terminal = ["py.typed", "*.yaml", "*.json", "*.txt"]
+
+# ============================================================================
+# UV Package Manager Configuration (for fast installs)
+# ============================================================================
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.2.2",
+    "black>=24.4.2",
+    "flake8>=7.0.0",
+    "mypy>=1.10.0",
+    "ruff>=0.4.0",
+    "pre-commit>=3.7.0",
+]
+
+# ============================================================================
+# Code Quality Tools Configuration
+# ============================================================================
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311', 'py312', 'py313']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.venv
+    | node_modules
+    | dist
+    | build
+    | __pycache__
+)/
+'''
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
+ignore = ["E501", "B008"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["terminal/tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+addopts = "-v --tb=short"

@@ -100,7 +100,7 @@ async function startAssistant() {
     logLines = [];
     outputChannel.clear();
     try {
-        assistantProcess = cp.spawn(pythonPath, ['-u', assistantScript], {
+        assistantProcess = cp.spawn(pythonPath, ['-u', assistantScript, '--cli'], {
             cwd: workspaceRoot,
             env: { ...process.env, PYTHONUNBUFFERED: '1' }
         });

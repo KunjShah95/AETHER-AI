@@ -4,8 +4,34 @@
   "description": "Surface the Nexus AI terminal assistant inside VS Code with quick models, utilities, and contextual controls.",
   "version": "0.1.0",
   "publisher": "kunjshah95",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KunjShah95/NEXUS-AI.io"
+  },
+  "homepage": "https://github.com/KunjShah95/NEXUS-AI.io#readme",
+  "bugs": {
+    "url": "https://github.com/KunjShah95/NEXUS-AI.io/issues"
+  },
+  "categories": [
+    "Machine Learning",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "assistant",
+    "terminal",
+    "nexus",
+    "gpt",
+    "chatgpt",
+    "code-assistant"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "engines": {
-    "vscode": "^1.80.0"
+    "vscode": "^1.86.0"
   },
   "main": "./dist/extension.js",
   "scripts": {
@@ -52,7 +78,7 @@
         "nexusAiAssistant.pythonPath": {
           "type": "string",
           "default": "python",
-          "description": "Path to the Python interpreter used to launch the terminal assistant."  
+          "description": "Path to the Python interpreter used to launch the terminal assistant."
         },
         "nexusAiAssistant.preferredModel": {
           "type": "string",

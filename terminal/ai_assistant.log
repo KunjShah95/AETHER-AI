@@ -144,3 +144,5 @@
 2025-11-23 20:00:24,489 - WARNING - Docker available but not running/accessible: Error while fetching server API version: (2, 'CreateFile', 'The system cannot find the file specified.')
 2025-11-23 20:05:53,727 - ERROR - Analytics DB Init Error: file is not a database
 2025-11-23 20:05:53,730 - WARNING - Docker available but not running/accessible: Error while fetching server API version: (2, 'CreateFile', 'The system cannot find the file specified.')
+2025-12-13 10:34:12,126 - ERROR - Analytics DB Init Error: file is not a database
+2025-12-13 10:34:12,131 - WARNING - Docker available but not running/accessible: Error while fetching server API version: (2, 'CreateFile', 'The system cannot find the file specified.')

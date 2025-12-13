@@ -20,6 +20,12 @@ import json
 import threading
 import openai
 import ollama
+try:
+    import google.generativeai as genai
+    from PIL import Image as PILImage  # Rename to avoid conflict if any
+except ImportError:
+    genai = None
+    PILImage = None
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -122,6 +128,53 @@ except ImportError:
         CloudIntegration = None
         BlockchainManager = None
         MLOpsManager = None
+
+# Import new feature modules (context engine, dev tools, mcp, streaming)
+try:
+    from terminal.context_engine import ContextEngine, create_default_templates
+    from terminal.developer_tools import DeveloperTools
+    from terminal.mcp_manager import MCPManager
+    from terminal.streaming import StreamingHandler, PipeInputHandler
+    from terminal.skills_manager import SkillsManager
+    from terminal.web_search import WebSearcher, set_last_search_results, get_last_search_results
+except ImportError:
+    try:
+        from context_engine import ContextEngine, create_default_templates
+        from developer_tools import DeveloperTools
+        from mcp_manager import MCPManager
+        from streaming import StreamingHandler, PipeInputHandler
+        from skills_manager import SkillsManager
+        from web_search import WebSearcher, set_last_search_results, get_last_search_results
+    except ImportError:
+        ContextEngine = None
+        DeveloperTools = None
+        MCPManager = None
+        StreamingHandler = None
+        PipeInputHandler = None
+        create_default_templates = None
+        SkillsManager = None
+        WebSearcher = None
+        set_last_search_results = None
+        get_last_search_results = None
+
+# Import advanced feature modules
+try:
+    from terminal.code_agent import CodeAgent
+    from terminal.smart_rag import SmartRAG
+    from terminal.workflow_engine import WorkflowEngine, StepType
+    from terminal.pair_programmer import PairProgrammer
+except ImportError:
+    try:
+        from code_agent import CodeAgent
+        from smart_rag import SmartRAG
+        from workflow_engine import WorkflowEngine, StepType
+        from pair_programmer import PairProgrammer
+    except ImportError:
+        CodeAgent = None
+        SmartRAG = None
+        WorkflowEngine = None
+        StepType = None
+        PairProgrammer = None
 
 # Cache for Ollama model list to avoid repeated expensive calls.
 from functools import lru_cache
@@ -233,7 +286,7 @@ def USER_DB_PATH() -> str:
     return os.path.join(_get_home_dir(), '.nexus', 'users.json')
 MAX_RETRIES = 3
 RATE_LIMIT_DELAY = 1.5
-VERSION = "3.1"
+VERSION = "1.0.0"
 REQUEST_TIMEOUT = 30
 
 # Enhanced Output Configuration
@@ -685,6 +738,32 @@ class AIManager:
         
         return f" {model} unavailable after {MAX_RETRIES} attempts"
 
+    def analyze_image(self, image_path: str, prompt: str) -> str:
+        """Analyze an image using a vision-capable model (Gemini)."""
+        if not self.gemini:
+            return "❌ Gemini model not active (required for vision)"
+        
+        if not PILImage:
+            return "❌ PIL/Pillow not installed (pip install pillow)"
+        
+        if not os.path.exists(image_path):
+            return f"❌ Image not found: {image_path}"
+        
+        try:
+            img = PILImage.open(image_path)
+            
+            # Use specific vision model if needed, but 2.0 Flash supports it
+            model = self.gemini
+            
+            response = model.generate_content([prompt, img])
+            
+            if not response or not hasattr(response, 'text'):
+                return "❌ No response from vision model"
+                
+            return response.text
+        except Exception as e:
+            return f"❌ Vision analysis failed: {str(e)}"
+
 # --- User Management ---
 class UserManager:
     def __init__(self):
@@ -923,6 +1002,30 @@ class NexusAI:
         self.blockchain = BlockchainManager() if BlockchainManager else None
         self.ml_ops = MLOpsManager() if MLOpsManager else None
         
+        # Initialize new feature modules
+        self.context_engine = ContextEngine() if ContextEngine else None
+        self.developer_tools = DeveloperTools(ai_query_func=self.ai.query if hasattr(self, 'ai') else None) if DeveloperTools else None
+        self.mcp_manager = MCPManager() if MCPManager else None
+        self.streaming_handler = StreamingHandler(console) if StreamingHandler else None
+        self.pipe_handler = PipeInputHandler() if PipeInputHandler else None
+        
+        # Initialize skills manager and web searcher
+        self.skills_manager = SkillsManager() if SkillsManager else None
+        self.web_searcher = WebSearcher() if WebSearcher else None
+        
+        # Initialize advanced modules
+        self.code_agent = CodeAgent(ai_query_func=self.ai.query if hasattr(self, 'ai') else None) if CodeAgent else None
+        self.smart_rag = SmartRAG() if SmartRAG else None
+        self.workflow_engine = WorkflowEngine(ai_query_func=self.ai.query if hasattr(self, 'ai') else None) if WorkflowEngine else None
+        self.pair_programmer = PairProgrammer(ai_query_func=self.ai.query if hasattr(self, 'ai') else None) if PairProgrammer else None
+        
+        # Create default templates
+        if self.context_engine and create_default_templates:
+            try:
+                create_default_templates(self.context_engine)
+            except Exception:
+                pass
+        
         # Update console theme if theme manager is available
         if self.theme_manager:
             update_console_theme(self.theme_manager)
@@ -969,48 +1072,98 @@ class NexusAI:
             logging.error(f"Config save error: {str(e)}")
     
     def show_banner(self):
-        # Modern, Clean Banner (No ASCII Art)
-        grid = Table.grid(expand=True)
-        grid.add_column(justify="center", ratio=1)
+        """Display the AetherAI startup banner with ASCII art and status."""
+        # ASCII Art Banner
+        banner_art = r"""
+    ╔═══════════════════════════════════════════════════════════════════╗
+    ║                                                                   ║
+    ║     █████╗ ███████╗████████╗██╗  ██╗███████╗██████╗  █████╗ ██╗   ║
+    ║    ██╔══██╗██╔════╝╚══██╔══╝██║  ██║██╔════╝██╔══██╗██╔══██╗██║   ║
+    ║    ███████║█████╗     ██║   ███████║█████╗  ██████╔╝███████║██║   ║
+    ║    ██╔══██║██╔══╝     ██║   ██╔══██║██╔══╝  ██╔══██╗██╔══██║██║   ║
+    ║    ██║  ██║███████╗   ██║   ██║  ██║███████╗██║  ██║██║  ██║██║   ║
+    ║    ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ║
+    ║                                                                   ║
+    ╚═══════════════════════════════════════════════════════════════════╝
+"""
         
-        # Main Title - Big and Clear
-        grid.add_row(Text(" ", style="reset")) # Spacer
-        grid.add_row(Text(" AETHER AI ", style="bold cyan underline", justify="center"))
-        grid.add_row(Text(" ", style="reset")) # Spacer
+        # Print ASCII art with gradient effect
+        lines = banner_art.strip().split('\n')
+        gradient_styles = ['bold bright_cyan', 'bold cyan', 'bold blue', 'bold bright_blue', 
+                          'bold magenta', 'bold bright_magenta', 'bold cyan', 'bold bright_cyan']
         
-        # Subtitle
-        grid.add_row(Text("Advanced Terminal Assistant", style="bold white italic", justify="center"))
-        grid.add_row(Text(" ", style="reset")) # Spacer
+        console.print()
+        for i, line in enumerate(lines):
+            style = gradient_styles[i % len(gradient_styles)]
+            console.print(Text(line, style=style))
+        console.print()
         
-        # Meta info
-        grid.add_row(Text(f"v{VERSION} • {self.current_model.upper()} • Secure", style="dim white", justify="center"))
-        grid.add_row(Text(" ", style="reset")) # Spacer
+        # Create info grid
+        info_grid = Table.grid(padding=1)
+        info_grid.add_column(justify="center", ratio=1)
+        
+        info_grid.add_row(Text("⚡ Production-Ready AI Terminal Assistant ⚡", style="bold white"))
+        info_grid.add_row(Text(f"v{VERSION} • {self.current_model.upper()} • Secure", style="dim white"))
         
         console.print(Panel(
-            grid,
+            info_grid,
             border_style="bright_blue",
-            padding=(1, 2),
-            title="[bold green]Online[/bold green]",
+            padding=(0, 2),
+            title="[bold green]● Online[/bold green]",
             title_align="right"
         ))
+        console.print()
         
-        # Status Table
-        table = Table(title=" AI Services Status", show_header=True, header_style="bold magenta")
-        table.add_column("Service", style="cyan", width=15)
-        table.add_column("Status", style="green", width=30)
-        table.add_column("Description", style="white", width=40)
+        # AI Services Status Table with enhanced styling
+        status_table = Table(
+            title="🤖 AI Services Status",
+            show_header=True,
+            header_style="bold magenta",
+            border_style="dim",
+            title_style="bold cyan"
+        )
+        status_table.add_column("Service", style="bold cyan", width=12)
+        status_table.add_column("Status", width=12)
+        status_table.add_column("Description", style="dim white", width=38)
         
-        descriptions = {
-            "gemini": "Google's Gemini 2.0 Flash (Fixed API)",
-            "groq": "Groq Cloud - Mixtral 8x7B",
-            "ollama": "Local Ollama Models (Most Secure)",
-            "huggingface": "HuggingFace Inference API",
-            "chatgpt": "OpenAI's ChatGPT (API)",
-            "mcp": "Model Context Protocol (API)"
-        }
-    
-        console.print(f"\n Current Model: [bold yellow]{self.current_model.upper()}[/bold yellow]")
-        console.print("\n Type [bold cyan]/help[/bold cyan] for commands or start chatting!\n")
+        # Add status for each service
+        for service, status in self.ai.status.items():
+            if "Ready" in status:
+                status_style = "[bold green]● Ready[/bold green]"
+            elif "Error" in status:
+                status_style = "[bold red]✗ Error[/bold red]"
+            elif "Not configured" in status:
+                status_style = "[yellow]○ Not Set[/yellow]"
+            else:
+                status_style = f"[dim]{status}[/dim]"
+            
+            desc = self.model_descriptions.get(service, "")
+            status_table.add_row(service.upper(), status_style, desc)
+        
+        console.print(status_table)
+        console.print()
+        
+        # Quick hints panel
+        hints = Table.grid(padding=(0, 3))
+        hints.add_column(style="bold cyan")
+        hints.add_column(style="white")
+        hints.add_column(style="bold cyan")
+        hints.add_column(style="white")
+        
+        hints.add_row("/help", "All commands", "/models", "AI services")
+        hints.add_row("/switch", "Change model", "/exit", "Exit")
+        
+        console.print(Panel(
+            hints,
+            border_style="dim",
+            padding=(0, 1),
+            title="[dim]Quick Commands[/dim]"
+        ))
+        console.print()
+        
+        console.print(f"[bold cyan]Current Model:[/bold cyan] [bold yellow]{self.current_model.upper()}[/bold yellow]")
+        console.print("[dim]Type your question or /help for commands[/dim]")
+        console.print()
 
     def execute_command(self, cmd: str) -> str:
         try:
@@ -1187,6 +1340,21 @@ class NexusAI:
         
         return formatted
     
+    def _handle_wake_word(self):
+        """Called when wake word is detected."""
+        console.print("\n[bold green]🎤 Wake Word Detected: Listening...[/bold green]")
+        # We want to capture the command immediately after the wake word
+        try:
+             cmd_text = self.voice_manager.listen(timeout=5, phrase_time_limit=10)
+             if cmd_text:
+                 console.print(f"[bold cyan]You said: {cmd_text}[/bold cyan]")
+                 response = self.process_input(cmd_text)
+                 console.print(response)
+             else:
+                 console.print("[dim]No command detected.[/dim]")
+        except Exception as e:
+            console.print(f"[red]Error processing voice command: {e}[/red]")
+
     def process_input(self, user_input: str) -> str:
         try:
             clean_input = self.security.sanitize(user_input)
@@ -1198,8 +1366,24 @@ class NexusAI:
                 feature = "ai_chat" if not clean_input.startswith("/") else clean_input.split()[0][1:]
                 self.analytics.track_usage(feature, self.user_manager.current_user or "anonymous")
             
+            # Handle / commands
             if clean_input.startswith("/"):
-                return self.handle_command(clean_input)
+                response = self.handle_command(clean_input)
+                # Track response in context engine
+                if self.context_engine:
+                    self.context_engine.add_message("user", clean_input)
+                    self.context_engine.add_message("assistant", response, {"type": "command"})
+                return response
+            
+            # Shell command shortcut: !command
+            if clean_input.startswith("!"):
+                shell_cmd = clean_input[1:].strip()
+                if shell_cmd:
+                    if self.developer_tools:
+                        return self.developer_tools.execute_shell_command(shell_cmd, safe_only=True)
+                    else:
+                        return self.execute_command(shell_cmd)
+            
             # AI features for logged-in users
             if self.user_manager.current_user:
                 self.user_manager.add_history(self.user_manager.current_user, clean_input)
@@ -1209,7 +1393,36 @@ class NexusAI:
                     return self.ai.query(self.current_model, f"Translate: {clean_input[10:]}")
                 if clean_input.startswith("explain "):
                     return self.ai.query(self.current_model, f"Explain: {clean_input[8:]}")
-            response = self.ai.query(self.current_model, clean_input)
+            
+            # Track user input in context
+            if self.context_engine:
+                self.context_engine.add_message("user", clean_input)
+            
+            # Build enhanced prompt with context
+            enhanced_prompt = clean_input
+            
+            # Add skills and rules context if available
+            if self.skills_manager:
+                system_context = self.skills_manager.get_system_context()
+                if system_context:
+                    # Prepend system context for better AI awareness
+                    enhanced_prompt = f"[System Context - Follow these guidelines]\n{system_context}\n\n[User Query]\n{clean_input}"
+            
+            # Add conversation context for multi-turn conversations
+            if self.context_engine and len(self.context_engine.messages) > 1:
+                # Get last few messages for context
+                context_str = self.context_engine.get_context_string(max_messages=5)
+                if context_str and len(context_str) < 3000:  # Limit context size
+                    enhanced_prompt = f"[Previous Conversation]\n{context_str}\n\n[Current Query]\n{clean_input}"
+            
+            # Get AI response with enhanced context
+            response = self.ai.query(self.current_model, enhanced_prompt)
+            
+            # Track response in context
+            if self.context_engine:
+                self.context_engine.add_message("assistant", response, {"model": self.current_model})
+            
+            # Voice output if enabled
             if self.voice_manager.enabled:
                 self.voice_manager.speak(response)
             return response
@@ -1258,6 +1471,16 @@ class NexusAI:
             if cmd == "voice off":
                 self.voice_manager.enabled = False
                 return "🔇 Voice disabled"
+            
+            if cmd == "voice wake on":
+                if not self.voice_manager.is_available():
+                    return "❌ Voice features not available"
+                self.voice_manager.listen_for_wake_word("aether", self._handle_wake_word)
+                return "🎤 Wake word 'Hey Aether' enabled! Just say it to command me."
+            
+            if cmd == "voice wake off":
+                self.voice_manager.config.continuous_listen = False
+                return "🔇 Wake word disabled."
             
             if cmd == "listen":
                 if not self.voice_manager.is_available():
@@ -1804,7 +2027,7 @@ class NexusAI:
                     help_text.append("🤖 AI MODEL COMMANDS:\n", style="bold yellow")
                     help_text.append("/switch gemini      - Switch to Gemini 2.0 Flash\n", style="white")
                     help_text.append("/switch groq        - Switch to Groq Mixtral\n", style="white")
-                    help_text.append("/switch ollama      - Switch to Ollama (default model)\n", style="white")
+                    help_text.append("/switch ollama      - Interactive model picker (select by number!)\n", style="white")
                     help_text.append("/switch ollama [model] - Switch to specific Ollama model\n", style="white")
                     help_text.append("/switch huggingface - Switch to HuggingFace\n", style="white")
                     help_text.append("/switch chatgpt     - Switch to ChatGPT (OpenAI)\n", style="white")
@@ -1813,6 +2036,7 @@ class NexusAI:
                     help_text.append("/run [command]      - Execute safe system commands (ls, pwd, whoami, date, etc.)\n", style="white")
                     help_text.append("/models             - List available AI models\n", style="white")
                     help_text.append("/ollama-models      - Show detailed list of available Ollama models\n", style="white")
+                    help_text.append("/ollama-select      - Quick interactive Ollama model picker\n", style="white")
                     help_text.append("/current-model      - Show currently active AI model\n", style="white")
                     help_text.append("/config             - Show configuration\n", style="white")
                     help_text.append("/sysinfo            - Display system information and resources\n", style="white")
@@ -1956,6 +2180,88 @@ class NexusAI:
                     help_text.append("/task overdue           - Show overdue tasks\n", style="white")
                     help_text.append("/task export [format]   - Export tasks (json/csv)\n\n", style="white")
 
+                    help_text.append("🛠️ DEVELOPER TOOLS (NEW!):\n", style="bold magenta")
+                    help_text.append("/analyze <file>         - AI-powered file analysis\n", style="white")
+                    help_text.append("/commit-msg             - Generate commit message from staged changes\n", style="white")
+                    help_text.append("/pr-desc [branch]       - Generate PR description\n", style="white")
+                    help_text.append("/clip or /copy          - Copy last response to clipboard\n", style="white")
+                    help_text.append("/paste                  - Paste from clipboard\n", style="white")
+                    help_text.append("!command                - Shell shortcut (e.g., !ls, !pwd)\n", style="white")
+                    help_text.append("/generate-tests <file>  - Generate unit tests\n", style="white")
+                    help_text.append("/explain-error <error>  - Debug errors with AI\n", style="white")
+                    help_text.append("/compare <prompt>       - Compare multiple AI models\n\n", style="white")
+
+                    help_text.append("💬 SESSIONS & CONTEXT:\n", style="bold magenta")
+                    help_text.append("/session new [name]     - Start new session\n", style="white")
+                    help_text.append("/session save [name]    - Save current session\n", style="white")
+                    help_text.append("/session load <name>    - Load a session\n", style="white")
+                    help_text.append("/session list           - List all sessions\n", style="white")
+                    help_text.append("/session delete <name>  - Delete a session\n", style="white")
+                    help_text.append("/export <file> [fmt]    - Export to md/json/html/txt\n", style="white")
+                    help_text.append("/save [name]            - Save response as favorite\n", style="white")
+                    help_text.append("/favorites              - List saved favorites\n", style="white")
+                    help_text.append("/templates              - List prompt templates\n", style="white")
+                    help_text.append("/template <name>        - Use a template\n", style="white")
+                    help_text.append("/project                - Detect project context\n\n", style="white")
+
+                    help_text.append("🌐 WEB SEARCH & DOCS:\n", style="bold magenta")
+                    help_text.append("/search <query>         - Search the web (DuckDuckGo)\n", style="white")
+                    help_text.append("/docs <topic> [tech]    - Search documentation\n", style="white")
+                    help_text.append("/fetch <url or number>  - Fetch URL content\n", style="white")
+                    help_text.append("/read <url>             - Read URL (alias)\n\n", style="white")
+
+                    help_text.append("📋 SKILLS & RULES (Claude-like):\n", style="bold magenta")
+                    help_text.append("/skills                 - List loaded skills\n", style="white")
+                    help_text.append("/skills reload          - Reload skills/rules files\n", style="white")
+                    help_text.append("/skills create          - Create SKILLS.md template\n", style="white")
+                    help_text.append("/rules                  - List active rules\n", style="white")
+                    help_text.append("/rules create           - Create RULES.md template\n\n", style="white")
+
+                    help_text.append("📡 MCP (Model Context Protocol):\n", style="bold magenta")
+                    help_text.append("/mcp list               - List configured servers\n", style="white")
+                    help_text.append("/mcp available          - Show installable servers\n", style="white")
+                    help_text.append("/mcp add <name>         - Add a server\n", style="white")
+                    help_text.append("/mcp start <name>       - Start a server\n", style="white")
+                    help_text.append("/mcp stop <name>        - Stop a server\n\n", style="white")
+
+                    help_text.append("🎤 VOICE COMMANDS:\n", style="bold magenta")
+                    help_text.append("/voice on/off           - Enable/disable voice\n", style="white")
+                    help_text.append("/voice status           - Voice system status\n", style="white")
+                    help_text.append("/voices                 - List available voices\n", style="white")
+                    help_text.append("/speak <text>           - Speak text aloud\n", style="white")
+                    help_text.append("/listen                 - Listen for voice input\n\n", style="white")
+
+                    help_text.append("👁️ VISION & IMAGE:\n", style="bold magenta")
+                    help_text.append("/vision <image> <prompt> - Analyze an image\n", style="white")
+                    help_text.append("/see [prompt]           - (Alias for /vision)\n\n", style="white")
+
+                    help_text.append("🤖 CODE AGENT (Autonomous):\n", style="bold cyan")
+                    help_text.append("/agent edit <file> <instruction> - AI code editing\n", style="white")
+                    help_text.append("/agent analyze [dir]    - Analyze project\n", style="white")
+                    help_text.append("/agent issues <file>    - Find code issues\n", style="white")
+                    help_text.append("/agent fix <file>       - Auto-fix issues\n\n", style="white")
+
+                    help_text.append("👥 PAIR PROGRAMMING:\n", style="bold cyan")
+                    help_text.append("/pair start <file>      - Start pair session\n", style="white")
+                    help_text.append("/pair status            - Session status\n", style="white")
+                    help_text.append("/pair end               - End session\n", style="white")
+                    help_text.append("/suggest                - Get code suggestions\n", style="white")
+                    help_text.append("/refactor [file]        - Refactoring suggestions\n\n", style="white")
+
+                    help_text.append("⚙️ WORKFLOWS:\n", style="bold cyan")
+                    help_text.append("/workflows              - List all workflows\n", style="white")
+                    help_text.append("/workflow create <name> - Create workflow\n", style="white")
+                    help_text.append("/workflow run <id>      - Run workflow\n", style="white")
+                    help_text.append("/workflow code-review   - Pre-built code review\n", style="white")
+                    help_text.append("/workflow standup       - Pre-built standup\n\n", style="white")
+
+                    help_text.append("📚 KNOWLEDGE BASE (RAG):\n", style="bold cyan")
+                    help_text.append("/kb                     - Knowledge base status\n", style="white")
+                    help_text.append("/kb add <file/dir>      - Add to knowledge base\n", style="white")
+                    help_text.append("/kb search <query>      - Search knowledge base\n", style="white")
+                    help_text.append("/kb ask <question>      - Answer with KB context\n", style="white")
+                    help_text.append("/kb list                - List indexed documents\n\n", style="white")
+
                     console.print(Panel(help_text, border_style="bright_green", padding=(1, 2)))
                     return ""
                 except Exception as e:
@@ -1984,51 +2290,111 @@ class NexusAI:
                 
                 if new_model == "ollama":
                     # Handle Ollama model switching
-                    if len(parts) >= 3:
-                        # User specified a specific Ollama model
-                        specific_model = parts[2]
-                        try:
-                            # Check if the model exists
-                            ollama_response = ollama.list()
-                            
-                            # Handle ListResponse object or dict
-                            if hasattr(ollama_response, 'models'):
-                                ollama_models = ollama_response.models
-                            elif isinstance(ollama_response, dict):
-                                ollama_models = ollama_response.get("models", [])
+                    try:
+                        # Get available models
+                        ollama_response = ollama.list()
+                        
+                        # Handle ListResponse object or dict
+                        if hasattr(ollama_response, 'models'):
+                            ollama_models = ollama_response.models
+                        elif isinstance(ollama_response, dict):
+                            ollama_models = ollama_response.get("models", [])
+                        else:
+                            ollama_models = []
+                        
+                        if not ollama_models:
+                            return "❌ No Ollama models found. Please pull a model first.\n   Example: ollama pull llama3"
+                        
+                        # Extract model names
+                        model_names = []
+                        for m in ollama_models:
+                            if hasattr(m, 'model'):
+                                model_names.append(m.model)
+                            elif hasattr(m, 'name'):
+                                model_names.append(m.name)
+                            elif isinstance(m, dict):
+                                model_names.append(m.get('name') or m.get('model', str(m)))
                             else:
-                                ollama_models = []
-                            
-                            # Extract model names from the response
-                            model_names = []
-                            for m in ollama_models:
-                                if hasattr(m, 'model'):
-                                    model_names.append(m.model)
-                                elif hasattr(m, 'name'):
-                                    model_names.append(m.name)
-                                elif isinstance(m, dict):
-                                    model_names.append(m.get('name') or m.get('model', str(m)))
-                                else:
-                                    model_names.append(str(m))
-                            
+                                model_names.append(str(m))
+                        
+                        if len(parts) >= 3:
+                            # User specified a model name directly
+                            specific_model = parts[2]
                             if specific_model in model_names:
                                 self.current_model = f"ollama:{specific_model}"
                                 self._save_config()
                                 return f"✅ Switched to Ollama model: {specific_model}"
                             else:
-                                if model_names:
-                                    available = ", ".join(model_names[:5])  # Show first 5
-                                    more_msg = f" (+{len(model_names) - 5} more)" if len(model_names) > 5 else ""
-                                    return f"❌ Model '{specific_model}' not found.\n   Available models: {available}{more_msg}\n   💡 Use /ollama-models to see all available models"
+                                # Try partial match
+                                matches = [m for m in model_names if specific_model.lower() in m.lower()]
+                                if len(matches) == 1:
+                                    self.current_model = f"ollama:{matches[0]}"
+                                    self._save_config()
+                                    return f"✅ Switched to Ollama model: {matches[0]}"
+                                elif len(matches) > 1:
+                                    return f"❌ Multiple matches found: {', '.join(matches)}\n   Please be more specific."
                                 else:
-                                    return f"❌ No Ollama models found. Please pull a model first.\n   Example: ollama pull llama3"
-                        except Exception as e:
-                            return f"❌ Error checking Ollama models: {str(e)}\n   Make sure Ollama is running"
-                    else:
-                        # Just switch to Ollama (default model)
-                        self.current_model = "ollama"
-                        self._save_config()
-                        return "✅ Switched to Ollama (default model)"
+                                    return f"❌ Model '{specific_model}' not found.\n   Use /switch ollama to see available models."
+                        
+                        # Show interactive numbered list
+                        console.print("\n[bold cyan]📦 Available Ollama Models:[/bold cyan]\n")
+                        for i, model in enumerate(model_names, 1):
+                            # Get model size if available
+                            size_str = ""
+                            for m in ollama_models:
+                                name = getattr(m, 'model', None) or getattr(m, 'name', None) or (m.get('name') if isinstance(m, dict) else None)
+                                if name == model:
+                                    size = getattr(m, 'size', None) or (m.get('size') if isinstance(m, dict) else None)
+                                    if size:
+                                        if size >= 1024**3:
+                                            size_str = f" ({size/(1024**3):.1f}GB)"
+                                        elif size >= 1024**2:
+                                            size_str = f" ({size/(1024**2):.0f}MB)"
+                                    break
+                            console.print(f"  [bold yellow]{i:2}[/bold yellow]) [green]{model}[/green]{size_str}")
+                        
+                        console.print(f"\n[dim]Enter number (1-{len(model_names)}) or model name, or 'q' to cancel:[/dim]")
+                        
+                        try:
+                            selection = input("> ").strip()
+                            
+                            if selection.lower() in ('q', 'quit', 'cancel', ''):
+                                return "❌ Model selection cancelled."
+                            
+                            # Check if it's a number
+                            if selection.isdigit():
+                                idx = int(selection)
+                                if 1 <= idx <= len(model_names):
+                                    selected_model = model_names[idx - 1]
+                                    self.current_model = f"ollama:{selected_model}"
+                                    self._save_config()
+                                    return f"✅ Switched to Ollama model: [bold green]{selected_model}[/bold green]"
+                                else:
+                                    return f"❌ Invalid selection. Enter 1-{len(model_names)}"
+                            else:
+                                # Try to match by name
+                                if selection in model_names:
+                                    self.current_model = f"ollama:{selection}"
+                                    self._save_config()
+                                    return f"✅ Switched to Ollama model: {selection}"
+                                else:
+                                    # Partial match
+                                    matches = [m for m in model_names if selection.lower() in m.lower()]
+                                    if len(matches) == 1:
+                                        self.current_model = f"ollama:{matches[0]}"
+                                        self._save_config()
+                                        return f"✅ Switched to Ollama model: {matches[0]}"
+                                    elif len(matches) > 1:
+                                        return f"❌ Multiple matches: {', '.join(matches)}"
+                                    else:
+                                        return f"❌ Model '{selection}' not found."
+                        except EOFError:
+                            return "❌ Model selection cancelled."
+                        except KeyboardInterrupt:
+                            return "❌ Model selection cancelled."
+                            
+                    except Exception as e:
+                        return f"❌ Error checking Ollama models: {str(e)}\n   Make sure Ollama is running (ollama serve)"
                 
                 elif new_model in valid_models:
                     self.current_model = new_model
@@ -2214,10 +2580,14 @@ class NexusAI:
                                 pass
                         rows.append(f"{name:<36}  {size:>10}  {params:>8}  {family:<12}  {quant:<8}  {modified}")
                     rows.append("\n💡 Use '/ollama-models [model_name]' to see full specs for a single model")
-                    rows.append("💡 Use '/switch ollama [model_name]' to select a model")
+                    rows.append("💡 Use '/switch ollama' for interactive model selection (pick by number!)")
                     return "\n".join(rows)
                 except Exception as e:
                     return f"❌ Failed to fetch Ollama models: {str(e)[:100]}"
+
+            # Quick alias for interactive ollama model selection
+            if cmd == "ollama-select" or cmd == "ollama select":
+                return self.handle_command("/switch ollama")
 
             if cmd == "current-model":
                 try:
@@ -3471,7 +3841,1149 @@ class NexusAI:
                         return f" Error running games: {e}"
                 return " Games module not available"
 
-            # --- Cloud Integration ---
+            # ================================================================
+            # NEW FEATURE COMMANDS - Developer Tools, Sessions, MCP
+            # ================================================================
+            
+            # --- File Analysis ---
+            if cmd.startswith("analyze "):
+                if not self.developer_tools:
+                    return "❌ Developer tools module not available"
+                parts = command.split(maxsplit=1)
+                if len(parts) < 2:
+                    return "Usage: /analyze <file_path>"
+                try:
+                    # Update AI query function
+                    self.developer_tools.ai_query = self.ai.query
+                    analysis = self.developer_tools.analyze_file(parts[1].strip(), self.current_model)
+                    return self.developer_tools.format_analysis(analysis)
+                except Exception as e:
+                    return f"❌ Analysis failed: {str(e)}"
+            
+            # --- Commit Message Generator ---
+            if cmd == "commit-msg" or cmd == "commit-message":
+                if not self.developer_tools:
+                    return "❌ Developer tools module not available"
+                try:
+                    self.developer_tools.ai_query = self.ai.query
+                    return self.developer_tools.generate_commit_message(self.current_model)
+                except Exception as e:
+                    return f"❌ Failed to generate commit message: {str(e)}"
+            
+            # --- PR Description Generator ---
+            if cmd.startswith("pr-desc"):
+                if not self.developer_tools:
+                    return "❌ Developer tools module not available"
+                parts = command.split()
+                base_branch = parts[1] if len(parts) > 1 else "main"
+                try:
+                    self.developer_tools.ai_query = self.ai.query
+                    return self.developer_tools.generate_pr_description(base_branch, self.current_model)
+                except Exception as e:
+                    return f"❌ Failed to generate PR description: {str(e)}"
+            
+            # --- Clipboard Commands ---
+            if cmd == "clip" or cmd == "copy":
+                if not self.developer_tools:
+                    return "❌ Developer tools module not available"
+                if not self.context_engine or not self.context_engine.last_response:
+                    return "❌ No response to copy. Ask me something first!"
+                success, msg = self.developer_tools.copy_to_clipboard(self.context_engine.last_response)
+                return msg
+            
+            if cmd.startswith("clip ") or cmd.startswith("copy "):
+                if not self.developer_tools:
+                    return "❌ Developer tools module not available"
+                text = command.split(maxsplit=1)[1] if len(command.split()) > 1 else ""
+                if not text:
+                    return "Usage: /clip <text to copy>"
+                success, msg = self.developer_tools.copy_to_clipboard(text)
+                return msg
+            
+            if cmd == "paste":
+                if not self.developer_tools:
+                    return "❌ Developer tools module not available"
+                content, error = self.developer_tools.paste_from_clipboard()
+                if error:
+                    return f"❌ {error}"
+                if not content:
+                    return "📋 Clipboard is empty"
+                return f"📋 Clipboard content:\n```\n{content[:2000]}\n```"
+            
+            # --- Session Management ---
+            if cmd.startswith("session "):
+                if not self.context_engine:
+                    return "❌ Context engine not available"
+                parts = command.split()
+                action = parts[1] if len(parts) > 1 else "list"
+                
+                if action == "new":
+                    name = parts[2] if len(parts) > 2 else None
+                    session_id = self.context_engine.new_session(name)
+                    return f"✅ New session started: {session_id}"
+                
+                elif action == "save":
+                    name = parts[2] if len(parts) > 2 else None
+                    try:
+                        session_name = self.context_engine.save_session(name)
+                        return f"✅ Session saved: {session_name}"
+                    except Exception as e:
+                        return f"❌ Failed to save session: {str(e)}"
+                
+                elif action == "load":
+                    if len(parts) < 3:
+                        return "Usage: /session load <name>"
+                    try:
+                        data = self.context_engine.load_session(parts[2])
+                        return f"✅ Session loaded: {parts[2]} ({data.get('message_count', 0)} messages)"
+                    except Exception as e:
+                        return f"❌ Failed to load session: {str(e)}"
+                
+                elif action == "list":
+                    sessions = self.context_engine.list_sessions()
+                    if not sessions:
+                        return "📁 No saved sessions"
+                    lines = ["📁 **Saved Sessions:**\n"]
+                    for i, s in enumerate(sessions[:10], 1):
+                        lines.append(f"  {i}. **{s['name']}** - {s['message_count']} msgs ({s['created_at'][:10]})")
+                    return "\n".join(lines)
+                
+                elif action == "delete":
+                    if len(parts) < 3:
+                        return "Usage: /session delete <name>"
+                    if self.context_engine.delete_session(parts[2]):
+                        return f"✅ Session deleted: {parts[2]}"
+                    return f"❌ Session not found: {parts[2]}"
+                
+                elif action == "current":
+                    current = self.context_engine.current_session or "No active session"
+                    msg_count = len(self.context_engine.messages)
+                    return f"📍 Current session: {current} ({msg_count} messages)"
+                
+                else:
+                    return "Usage: /session [new|save|load|list|delete|current] [name]"
+            
+            # --- Export ---
+            if cmd.startswith("export"):
+                if not self.context_engine:
+                    return "❌ Context engine not available"
+                parts = command.split()
+                
+                if len(parts) < 2:
+                    return "Usage: /export <filename> [format: md|json|html|txt]"
+                
+                filename = parts[1]
+                format_type = parts[2] if len(parts) > 2 else None
+                
+                try:
+                    result = self.context_engine.export_to_file(filename, format_type)
+                    return f"✅ Exported to: {result}"
+                except Exception as e:
+                    return f"❌ Export failed: {str(e)}"
+            
+            # --- Favorites ---
+            if cmd == "save" or cmd == "favorite":
+                if not self.context_engine:
+                    return "❌ Context engine not available"
+                try:
+                    fav_id = self.context_engine.save_favorite()
+                    return f"⭐ Saved as favorite: {fav_id}"
+                except Exception as e:
+                    return f"❌ Failed to save: {str(e)}"
+            
+            if cmd.startswith("save "):
+                if not self.context_engine:
+                    return "❌ Context engine not available"
+                name = command.split(maxsplit=1)[1].strip()
+                try:
+                    fav_id = self.context_engine.save_favorite(name)
+                    return f"⭐ Saved as favorite: {fav_id}"
+                except Exception as e:
+                    return f"❌ Failed to save: {str(e)}"
+            
+            if cmd == "favorites" or cmd == "favs":
+                if not self.context_engine:
+                    return "❌ Context engine not available"
+                favs = self.context_engine.list_favorites()
+                if not favs:
+                    return "⭐ No favorites saved\n   Use /save to save the last response"
+                lines = ["⭐ **Your Favorites:**\n"]
+                for i, fav in enumerate(favs[:10], 1):
+                    query = fav.get('query', '')[:50]
+                    lines.append(f"  {i}. **{fav['id']}** - {query}...")
+                lines.append("\n💡 Use /favorite <number> to view")
+                return "\n".join(lines)
+            
+            if cmd.startswith("favorite ") or cmd.startswith("fav "):
+                if not self.context_engine:
+                    return "❌ Context engine not available"
+                parts = command.split()
+                if len(parts) < 2:
+                    return "Usage: /favorite <name_or_number>"
+                fav = self.context_engine.get_favorite(parts[1])
+                if fav:
+                    return f"⭐ **{fav['id']}**\n\n**Query:** {fav.get('query', 'N/A')}\n\n**Response:**\n{fav['response']}"
+                return f"❌ Favorite not found: {parts[1]}"
+            
+            # --- Templates ---
+            if cmd == "templates" or cmd == "template list":
+                if not self.context_engine:
+                    return "❌ Context engine not available"
+                templates = self.context_engine.list_templates()
+                if not templates:
+                    return "📝 No templates available"
+                lines = ["📝 **Available Templates:**\n"]
+                for t in templates:
+                    vars_str = f" ({', '.join(t['variables'])})" if t['variables'] else ""
+                    lines.append(f"  • **{t['name']}**{vars_str} - {t['description']}")
+                lines.append("\n💡 Use /template <name> to apply")
+                return "\n".join(lines)
+            
+            if cmd.startswith("template "):
+                if not self.context_engine:
+                    return "❌ Context engine not available"
+                parts = command.split(maxsplit=1)[1].split()
+                if not parts:
+                    return "Usage: /template <name> [var1=value1 var2=value2]"
+                
+                template_name = parts[0]
+                template = self.context_engine.get_template(template_name)
+                if not template:
+                    return f"❌ Template not found: {template_name}"
+                
+                # Parse variables
+                kwargs = {}
+                for part in parts[1:]:
+                    if '=' in part:
+                        key, value = part.split('=', 1)
+                        kwargs[key] = value
+                
+                if template['variables'] and not kwargs:
+                    return f"📝 Template '{template_name}' requires variables: {', '.join(template['variables'])}\n   Usage: /template {template_name} " + " ".join([f"{v}=<value>" for v in template['variables']])
+                
+                try:
+                    prompt = self.context_engine.apply_template(template_name, **kwargs)
+                    return f"📝 **Applied Template:** {template_name}\n\n{prompt}"
+                except Exception as e:
+                    return f"❌ Template error: {str(e)}"
+            
+            # --- Multi-Model Compare ---
+            if cmd.startswith("compare "):
+                if not self.developer_tools:
+                    return "❌ Developer tools module not available"
+                prompt = command.split(maxsplit=1)[1] if len(command.split()) > 1 else ""
+                if not prompt:
+                    return "Usage: /compare <prompt to send to multiple models>"
+                
+                console.print("[dim]Querying multiple models...[/dim]")
+                self.developer_tools.ai_query = self.ai.query
+                try:
+                    results = self.developer_tools.compare_models(prompt)
+                    return self.developer_tools.format_comparison(results)
+                except Exception as e:
+                    return f"❌ Comparison failed: {str(e)}"
+            
+            # --- Generate Tests ---
+            if cmd.startswith("generate-tests ") or cmd.startswith("test-gen "):
+                if not self.developer_tools:
+                    return "❌ Developer tools module not available"
+                parts = command.split()
+                if len(parts) < 2:
+                    return "Usage: /generate-tests <file_path> [test_framework]"
+                filepath = parts[1]
+                framework = parts[2] if len(parts) > 2 else "pytest"
+                try:
+                    self.developer_tools.ai_query = self.ai.query
+                    return self.developer_tools.generate_tests(filepath, self.current_model, framework)
+                except Exception as e:
+                    return f"❌ Failed to generate tests: {str(e)}"
+            
+            # --- Error Explainer ---
+            if cmd.startswith("explain-error ") or cmd.startswith("fix-error "):
+                if not self.developer_tools:
+                    return "❌ Developer tools module not available"
+                error_text = command.split(maxsplit=1)[1] if len(command.split()) > 1 else ""
+                if not error_text:
+                    return "Usage: /explain-error <error message or paste your error>"
+                try:
+                    self.developer_tools.ai_query = self.ai.query
+                    return self.developer_tools.explain_error(error_text, "", self.current_model)
+                except Exception as e:
+                    return f"❌ Error analysis failed: {str(e)}"
+            
+            # --- MCP Commands ---
+            if cmd.startswith("mcp "):
+                if not self.mcp_manager:
+                    return "❌ MCP Manager not available"
+                parts = command.split()
+                action = parts[1] if len(parts) > 1 else "list"
+                
+                if action == "list":
+                    return self.mcp_manager.format_server_list()
+                
+                elif action == "available":
+                    servers = self.mcp_manager.list_available_servers()
+                    lines = ["📡 **Available MCP Servers:**\n"]
+                    for s in servers:
+                        status = "✅ installed" if s['installed'] else "⚪ available"
+                        lines.append(f"  {status} **{s['name']}** - {s['description']}")
+                    return "\n".join(lines)
+                
+                elif action == "add":
+                    if len(parts) < 3:
+                        return "Usage: /mcp add <server_name>"
+                    server_name = parts[2]
+                    server = self.mcp_manager.add_default_server(server_name)
+                    if server:
+                        return f"✅ Added MCP server: {server_name}\n   Use /mcp start {server_name} to start it"
+                    return f"❌ Unknown server: {server_name}\n   Use /mcp available to see options"
+                
+                elif action == "start":
+                    if len(parts) < 3:
+                        return "Usage: /mcp start <server_name>"
+                    success, msg = self.mcp_manager.start_server(parts[2])
+                    return f"{'✅' if success else '❌'} {msg}"
+                
+                elif action == "stop":
+                    if len(parts) < 3:
+                        return "Usage: /mcp stop <server_name>"
+                    success, msg = self.mcp_manager.stop_server(parts[2])
+                    return f"{'✅' if success else '❌'} {msg}"
+                
+                elif action == "status":
+                    if len(parts) < 3:
+                        return "Usage: /mcp status <server_name>"
+                    status = self.mcp_manager.get_server_status(parts[2])
+                    if "error" in status:
+                        return f"❌ {status['error']}"
+                    lines = [f"📡 **{status['name']}**"]
+                    lines.append(f"   Status: {status['status']}")
+                    lines.append(f"   Command: {status['command']}")
+                    if status.get('pid'):
+                        lines.append(f"   PID: {status['pid']}")
+                    return "\n".join(lines)
+                
+                elif action == "remove":
+                    if len(parts) < 3:
+                        return "Usage: /mcp remove <server_name>"
+                    if self.mcp_manager.remove_server(parts[2]):
+                        return f"✅ Removed MCP server: {parts[2]}"
+                    return f"❌ Server not found: {parts[2]}"
+                
+                else:
+                    return "Usage: /mcp [list|available|add|start|stop|status|remove] <server_name>"
+            
+            # --- Enhanced Voice Commands ---
+            if cmd == "voice status":
+                return self.voice_manager.format_status() if hasattr(self.voice_manager, 'format_status') else "Voice: " + ("Enabled" if self.voice_manager.enabled else "Disabled")
+            
+            if cmd == "voices":
+                if hasattr(self.voice_manager, 'list_voices'):
+                    voices = self.voice_manager.list_voices()
+                    if not voices:
+                        return "❌ No voices available"
+                    lines = ["🔊 **Available Voices:**\n"]
+                    for i, v in enumerate(voices[:10], 1):
+                        lines.append(f"  {i}. {v.get('name', 'Unknown')}")
+                    lines.append("\n💡 Use /voice set <name> to change voice")
+                    return "\n".join(lines)
+                return "❌ Voice listing not available"
+            
+            if cmd.startswith("speak "):
+                text = command.split(maxsplit=1)[1] if len(command.split()) > 1 else ""
+                if not text:
+                    return "Usage: /speak <text to speak>"
+                if hasattr(self.voice_manager, 'speak'):
+                    self.voice_manager.enabled = True  # Temporarily enable for this
+                    self.voice_manager.speak(text)
+                    return "🔊 Speaking..."
+                return "❌ TTS not available"
+            
+            # --- Project Context ---
+            if cmd == "project" or cmd == "context":
+                if not self.context_engine:
+                    return "❌ Context engine not available"
+                try:
+                    context = self.context_engine.detect_project_context()
+                    lines = [f"📁 **Project Context:**\n"]
+                    lines.append(f"  Name: {context.get('name', 'Unknown')}")
+                    lines.append(f"  Type: {context.get('type', 'Unknown')}")
+                    if context.get('languages'):
+                        lines.append(f"  Languages: {', '.join(context['languages'])}")
+                    if context.get('frameworks'):
+                        lines.append(f"  Frameworks: {', '.join(context['frameworks'])}")
+                    if context.get('vcs'):
+                        lines.append(f"  VCS: {context['vcs']}")
+                    if context.get('repository'):
+                        lines.append(f"  Repository: {context['repository']}")
+                    return "\n".join(lines)
+                except Exception as e:
+                    return f"❌ Failed to detect project: {str(e)}"
+
+            # ================================================================
+            # SKILLS & RULES MANAGEMENT (Claude-like)
+            # ================================================================
+            
+            # --- Skills Commands ---
+            if cmd == "skills":
+                if not self.skills_manager:
+                    return "❌ Skills manager not available"
+                return self.skills_manager.format_skills_list()
+            
+            if cmd == "skills reload":
+                if not self.skills_manager:
+                    return "❌ Skills manager not available"
+                self.skills_manager.reload()
+                return "✅ Skills and rules reloaded"
+            
+            if cmd == "skills create":
+                if not self.skills_manager:
+                    return "❌ Skills manager not available"
+                try:
+                    filepath = self.skills_manager.create_skills_file()
+                    return f"✅ Created skills file: {filepath}\n   Edit this file to customize your AI's skills."
+                except Exception as e:
+                    return f"❌ Failed to create skills file: {str(e)}"
+            
+            # --- Rules Commands ---
+            if cmd == "rules":
+                if not self.skills_manager:
+                    return "❌ Skills manager not available"
+                return self.skills_manager.format_rules_list()
+            
+            if cmd == "rules create":
+                if not self.skills_manager:
+                    return "❌ Skills manager not available"
+                try:
+                    filepath = self.skills_manager.create_rules_file()
+                    return f"✅ Created rules file: {filepath}\n   Edit this file to add project-specific rules."
+                except Exception as e:
+                    return f"❌ Failed to create rules file: {str(e)}"
+            
+            # ================================================================
+            # WEB SEARCH & DOCUMENT FETCHING
+            # ================================================================
+            
+            # --- Web Search ---
+            if cmd.startswith("search ") or cmd.startswith("websearch "):
+                if not self.web_searcher:
+                    return "❌ Web searcher not available. Install: pip install duckduckgo-search requests beautifulsoup4"
+                
+                query = command.split(maxsplit=1)[1] if len(command.split()) > 1 else ""
+                if not query:
+                    return "Usage: /search <query>"
+                
+                try:
+                    availability = self.web_searcher.is_available()
+                    if not availability.get('web_search'):
+                        return "❌ Web search not available. Install: pip install duckduckgo-search"
+                    
+                    results = self.web_searcher.search(query)
+                    if set_last_search_results:
+                        set_last_search_results(results)
+                    return self.web_searcher.format_search_results(results)
+                except Exception as e:
+                    return f"❌ Search failed: {str(e)}"
+            
+            # --- Documentation Search ---
+            if cmd.startswith("docs "):
+                if not self.web_searcher:
+                    return "❌ Web searcher not available"
+                
+                parts = command.split(maxsplit=2)
+                if len(parts) < 2:
+                    return "Usage: /docs <query> [technology]"
+                
+                query = parts[1]
+                technology = parts[2] if len(parts) > 2 else None
+                
+                try:
+                    console.print("[dim]Searching documentation...[/dim]")
+                    return self.web_searcher.fetch_docs(query, technology)
+                except Exception as e:
+                    return f"❌ Documentation fetch failed: {str(e)}"
+            
+            # --- Fetch URL ---
+            if cmd.startswith("fetch "):
+                if not self.web_searcher:
+                    return "❌ Web searcher not available"
+                
+                target = command.split(maxsplit=1)[1] if len(command.split()) > 1 else ""
+                if not target:
+                    return "Usage: /fetch <url or search result number>"
+                
+                try:
+                    # Check if it's a number (referring to last search results)
+                    if target.isdigit():
+                        results = get_last_search_results() if get_last_search_results else []
+                        idx = int(target) - 1
+                        if 0 <= idx < len(results):
+                            url = results[idx].url
+                        else:
+                            return f"❌ Invalid result number. Last search had {len(results)} results."
+                    elif self.web_searcher.is_url(target):
+                        url = target
+                    else:
+                        return f"❌ '{target}' is not a valid URL. Use /search first, then /fetch <number>"
+                    
+                    console.print(f"[dim]Fetching {url}...[/dim]")
+                    doc = self.web_searcher.fetch_with_cache(url)
+                    return self.web_searcher.format_document(doc)
+                    
+                except Exception as e:
+                    return f"❌ Fetch failed: {str(e)}"
+            
+            # --- Read URL (alias for fetch) ---
+            if cmd.startswith("read ") and self.web_searcher and self.web_searcher.is_url(command.split()[1] if len(command.split()) > 1 else ""):
+                url = command.split(maxsplit=1)[1]
+                try:
+                    console.print(f"[dim]Reading {url}...[/dim]")
+                    doc = self.web_searcher.fetch_with_cache(url)
+                    return self.web_searcher.format_document(doc)
+                except Exception as e:
+                    return f"❌ Read failed: {str(e)}"
+
+            # ================================================================
+            # UTILITY COMMANDS
+            # ================================================================
+            
+            # --- Quick Start Guide ---
+            if cmd == "quickstart" or cmd == "getting-started":
+                lines = [
+                    "🚀 **AetherAI Quick Start Guide**\n",
+                    "━" * 40 + "\n",
+                    "**1. Set up your API keys:**",
+                    "   `/setkey gemini YOUR_API_KEY`",
+                    "   `/setkey groq YOUR_API_KEY`\n",
+                    "**2. Choose your AI model:**",
+                    "   `/switch gemini`  - Google's Gemini",
+                    "   `/switch groq`    - Fast Groq Cloud",
+                    "   `/switch ollama`  - Local models (private)\n",
+                    "**3. Start chatting:**",
+                    "   Just type your question!\n",
+                    "**4. Try these powerful features:**",
+                    "   `/analyze main.py`   - Analyze code",
+                    "   `/commit-msg`        - Generate commit message",
+                    "   `/search python asyncio` - Search the web",
+                    "   `/templates`         - View prompt templates\n",
+                    "**5. Customize with Skills & Rules:**",
+                    "   `/skills create`     - Create SKILLS.md",
+                    "   `/rules create`      - Create RULES.md\n",
+                    "📖 Type `/help` for full command list"
+                ]
+                return "\n".join(lines)
+            
+            # --- Feature Status ---
+            if cmd == "status" or cmd == "features":
+                lines = [
+                    "📊 **AetherAI Feature Status**\n",
+                    "━" * 40 + "\n",
+                    "**Core:**",
+                    f"  ✅ AI Models: {', '.join(self.ai.status.keys())}",
+                    f"  ✅ Current Model: {self.current_model}\n",
+                    "**Modules:**"
+                ]
+                
+                # Check module availability
+                modules = [
+                    ("Context Engine", self.context_engine),
+                    ("Developer Tools", self.developer_tools),
+                    ("Skills Manager", self.skills_manager),
+                    ("Web Searcher", self.web_searcher),
+                    ("MCP Manager", self.mcp_manager),
+                    ("Voice Manager", self.voice_manager),
+                    ("Analytics", self.analytics),
+                    ("Theme Manager", self.theme_manager),
+                ]
+                
+                for name, module in modules:
+                    status = "✅" if module else "❌"
+                    lines.append(f"  {status} {name}")
+                
+                # Check optional dependencies
+                lines.append("\n**Optional Dependencies:**")
+                try:
+                    import pyperclip
+                    lines.append("  ✅ Clipboard (pyperclip)")
+                except ImportError:
+                    lines.append("  ❌ Clipboard - `pip install pyperclip`")
+                
+                if self.web_searcher:
+                    avail = self.web_searcher.is_available()
+                    lines.append(f"  {'✅' if avail.get('duckduckgo') else '❌'} Web Search - `pip install duckduckgo-search`")
+                    lines.append(f"  {'✅' if avail.get('html2text') else '❌'} HTML2Text - `pip install html2text`")
+                
+                if hasattr(self.voice_manager, 'is_stt_available'):
+                    lines.append(f"  {'✅' if self.voice_manager.is_stt_available() else '❌'} Speech-to-Text - `pip install SpeechRecognition pyaudio`")
+                    lines.append(f"  {'✅' if self.voice_manager.is_tts_available() else '❌'} Text-to-Speech - `pip install pyttsx3`")
+                
+                # Show loaded skills/rules
+                if self.skills_manager:
+                    skill_count = len(self.skills_manager.list_skills())
+                    rule_count = len(self.skills_manager.list_rules())
+                    lines.append(f"\n**Configuration:**")
+                    lines.append(f"  📋 Skills loaded: {skill_count}")
+                    lines.append(f"  📜 Rules loaded: {rule_count}")
+                
+                return "\n".join(lines)
+            
+            # --- Cheatsheet ---
+            if cmd == "cheat" or cmd == "cheatsheet":
+                lines = [
+                    "📖 **AetherAI Cheatsheet**\n",
+                    "━" * 40 + "\n",
+                    "**Quick Actions:**",
+                    "  `!ls`              - List files (shell shortcut)",
+                    "  `/analyze <file>`  - Analyze code",
+                    "  `/commit-msg`      - Generate commit message",
+                    "  `/clip`            - Copy last response\n",
+                    "**AI Models:**",
+                    "  `/switch gemini`   - Use Google Gemini",
+                    "  `/switch groq`     - Use Groq (fast)",
+                    "  `/switch ollama`   - Use local models\n",
+                    "**Web:**",
+                    "  `/search <query>`  - Search the web",
+                    "  `/fetch <url>`     - Read a webpage",
+                    "  `/docs <topic>`    - Search docs\n",
+                    "**Sessions:**",
+                    "  `/session save`    - Save conversation",
+                    "  `/session list`    - List sessions",
+                    "  `/export chat.md`  - Export to file\n",
+                    "**Customization:**",
+                    "  `/skills create`   - Create SKILLS.md",
+                    "  `/rules create`    - Create RULES.md",
+                    "  `/templates`       - View templates\n",
+                    "**Help:**",
+                    "  `/help`            - Full command list",
+                    "  `/quickstart`      - Quick start guide"
+                ]
+                return "\n".join(lines)
+            
+            # --- Summarize URL ---
+            if cmd.startswith("summarize-url ") or cmd.startswith("sum-url "):
+                if not self.web_searcher:
+                    return "❌ Web searcher not available"
+                
+                url = command.split(maxsplit=1)[1] if len(command.split()) > 1 else ""
+                if not url or not self.web_searcher.is_url(url):
+                    return "Usage: /summarize-url <url>"
+                
+                try:
+                    console.print(f"[dim]Fetching and summarizing {url}...[/dim]")
+                    doc = self.web_searcher.fetch_with_cache(url)
+                    
+                    # Use AI to summarize
+                    summary_prompt = f"Please summarize the following web page content in 3-5 bullet points:\n\n{doc.content[:8000]}"
+                    summary = self.ai.query(self.current_model, summary_prompt)
+                    
+                    return f"📄 **Summary of:** {doc.title}\n🔗 {url}\n\n{summary}"
+                except Exception as e:
+                    return f"❌ Summarization failed: {str(e)}"
+            
+            # --- Ask with URL Context ---
+            if cmd.startswith("ask-url "):
+                if not self.web_searcher:
+                    return "❌ Web searcher not available"
+                
+                parts = command.split(maxsplit=2)
+                if len(parts) < 3:
+                    return "Usage: /ask-url <url> <question>"
+                
+                url = parts[1]
+                question = parts[2]
+                
+                if not self.web_searcher.is_url(url):
+                    return "❌ Invalid URL"
+                
+                try:
+                    console.print(f"[dim]Fetching {url}...[/dim]")
+                    doc = self.web_searcher.fetch_with_cache(url)
+                    
+                    # Use AI to answer with context
+                    context_prompt = f"Based on the following web page content, answer this question: {question}\n\nWeb page content:\n{doc.content[:10000]}"
+                    answer = self.ai.query(self.current_model, context_prompt)
+                    
+                    return f"📄 **Source:** {doc.title}\n❓ **Question:** {question}\n\n{answer}"
+                except Exception as e:
+                    return f"❌ Failed: {str(e)}"
+            
+            # --- Clear Context ---
+            if cmd == "clear-context" or cmd == "reset-context":
+                if self.context_engine:
+                    self.context_engine.messages = []
+                    return "✅ Conversation context cleared"
+                return "❌ Context engine not available"
+            
+            # --- Show Context ---
+            if cmd == "show-context":
+                if not self.context_engine:
+                    return "❌ Context engine not available"
+                
+                messages = self.context_engine.messages[-10:]  # Last 10 messages
+                if not messages:
+                    return "📭 No conversation context (start chatting!)"
+                
+                lines = ["📝 **Recent Conversation Context:**\n"]
+                for msg in messages:
+                    role = msg.get('role', 'unknown').capitalize()
+                    content = msg.get('content', '')[:100]
+                    if len(msg.get('content', '')) > 100:
+                        content += "..."
+                    lines.append(f"**{role}:** {content}")
+                
+                lines.append(f"\n_Total messages: {len(self.context_engine.messages)}_")
+                return "\n".join(lines)
+
+            # --- Vision Command ---
+            if cmd.startswith("vision ") or cmd.startswith("see "):
+                parts = command.split(maxsplit=2)
+                if len(parts) < 3:
+                     # Check if there is a default prompt or just image
+                     if len(parts) == 2:
+                         image_path = parts[1]
+                         prompt = "Describe this image in detail."
+                     else:
+                        return "Usage: /vision <image_path> [prompt]"
+                else:
+                    image_path = parts[1]
+                    prompt = parts[2]
+                
+                console.print(f"[dim]Analyzing image {image_path}...[/dim]")
+                return self.ai.analyze_image(image_path, prompt)
+
+            # ================================================================
+            # ADVANCED FEATURES - CODE AGENT
+            # ================================================================
+            
+            # --- Code Agent: Edit with AI ---
+            if cmd.startswith("agent edit "):
+                if not self.code_agent:
+                    return "❌ Code agent not available"
+                
+                parts = command.split(maxsplit=3)
+                if len(parts) < 4:
+                    return "Usage: /agent edit <file> <instruction>"
+                
+                filepath = parts[2]
+                instruction = parts[3]
+                
+                try:
+                    console.print(f"[dim]Creating edit for {filepath}...[/dim]")
+                    edit = self.code_agent.create_edit_from_ai(filepath, instruction, self.current_model)
+                    
+                    if not edit:
+                        return "❌ Failed to generate edit"
+                    
+                    # Show diff preview
+                    diff = self.code_agent.generate_diff(edit.original_content, edit.new_content, filepath)
+                    return f"📝 **Proposed Edit:** {instruction}\n\n```diff\n{diff[:3000]}\n```\n\n💡 Use `/agent apply` to apply this change"
+                    
+                except Exception as e:
+                    return f"❌ Error: {str(e)}"
+            
+            # --- Code Agent: Analyze Project ---
+            if cmd.startswith("agent analyze") or cmd == "analyze-project":
+                if not self.code_agent:
+                    return "❌ Code agent not available"
+                
+                directory = command.split(maxsplit=2)[2] if len(command.split()) > 2 else "."
+                
+                try:
+                    console.print("[dim]Analyzing project...[/dim]")
+                    analysis = self.code_agent.analyze_project(directory)
+                    return self.code_agent.format_project_analysis(analysis)
+                except Exception as e:
+                    return f"❌ Error: {str(e)}"
+            
+            # --- Code Agent: Find Issues ---
+            if cmd.startswith("agent issues ") or cmd.startswith("find-issues "):
+                if not self.code_agent:
+                    return "❌ Code agent not available"
+                
+                filepath = command.split(maxsplit=2)[2] if len(command.split()) > 2 else ""
+                if not filepath:
+                    return "Usage: /agent issues <file>"
+                
+                try:
+                    issues = self.code_agent.find_issues(filepath)
+                    if not issues:
+                        return f"✅ No issues found in {filepath}"
+                    
+                    lines = [f"🔍 **Issues in {filepath}:**\n"]
+                    for issue in issues:
+                        icon = {"high": "🔴", "medium": "🟡", "low": "🔵"}.get(issue.get('severity', ''), "⚪")
+                        lines.append(f"{icon} Line {issue['line']}: [{issue['type']}] {issue['message']}")
+                    
+                    return "\n".join(lines)
+                except Exception as e:
+                    return f"❌ Error: {str(e)}"
+            
+            # --- Code Agent: Auto-fix ---
+            if cmd.startswith("agent fix ") or cmd.startswith("auto-fix "):
+                if not self.code_agent:
+                    return "❌ Code agent not available"
+                
+                filepath = command.split(maxsplit=2)[2] if len(command.split()) > 2 else ""
+                if not filepath:
+                    return "Usage: /agent fix <file>"
+                
+                try:
+                    console.print(f"[dim]Finding and fixing issues in {filepath}...[/dim]")
+                    edits = self.code_agent.auto_fix_file(filepath, self.current_model)
+                    
+                    if not edits:
+                        return f"✅ No fixable issues found in {filepath}"
+                    
+                    edit = edits[0]
+                    diff = self.code_agent.generate_diff(edit.original_content, edit.new_content, filepath)
+                    return f"🔧 **Auto-fix for {filepath}:**\n\n```diff\n{diff[:3000]}\n```"
+                except Exception as e:
+                    return f"❌ Error: {str(e)}"
+            
+            # --- Code Agent: Execute Code ---
+            if cmd.startswith("agent run ") or cmd.startswith("run-code "):
+                if not self.code_agent:
+                    return "❌ Code agent not available"
+                
+                parts = command.split(maxsplit=2)
+                if len(parts) < 3:
+                    return "Usage: /agent run <language>\nThen enter your code..."
+                
+                language = parts[2]
+                # For now just show usage - actual code would come from input
+                return f"📋 Ready to execute {language} code.\nPaste your code and type `/execute` to run it in sandbox."
+            
+            # ================================================================
+            # PAIR PROGRAMMING
+            # ================================================================
+            
+            # --- Start Pair Session ---
+            if cmd.startswith("pair start ") or cmd.startswith("pair "):
+                if not self.pair_programmer:
+                    return "❌ Pair programmer not available"
+                
+                filepath = command.split(maxsplit=2)[-1]
+                if not filepath or filepath in ["start", "pair"]:
+                    return "Usage: /pair start <file>"
+                
+                try:
+                    session = self.pair_programmer.start_session(filepath)
+                    return f"👥 **Pair Programming Session Started**\n📄 File: {session.filepath}\n🔤 Language: {session.language}\n\n💡 Commands:\n  `/suggest` - Get code suggestions\n  `/fix <error>` - Get fix suggestions\n  `/refactor` - Refactoring suggestions\n  `/explain` - Explain code\n  `/pair end` - End session"
+                except Exception as e:
+                    return f"❌ Error: {str(e)}"
+            
+            # --- Pair Status ---
+            if cmd == "pair status":
+                if not self.pair_programmer:
+                    return "❌ Pair programmer not available"
+                return self.pair_programmer.format_session_status()
+            
+            # --- Pair End ---
+            if cmd == "pair end":
+                if not self.pair_programmer:
+                    return "❌ Pair programmer not available"
+                summary = self.pair_programmer.end_session()
+                if "error" in summary:
+                    return f"❌ {summary['error']}"
+                return f"👋 **Session Ended**\nSuggestions made: {summary['suggestions_made']}\nAccepted: {summary['suggestions_accepted']}"
+            
+            # --- Suggest ---
+            if cmd == "suggest" or cmd.startswith("suggest "):
+                if not self.pair_programmer:
+                    return "❌ Pair programmer not available"
+                
+                if not self.pair_programmer.current_session:
+                    return "❌ No active pair programming session. Use `/pair start <file>`"
+                
+                try:
+                    filepath = self.pair_programmer.current_session.filepath
+                    content, error = self.code_agent.read_file(filepath) if self.code_agent else ("", "No code agent")
+                    
+                    if error:
+                        return f"❌ {error}"
+                    
+                    console.print("[dim]Getting suggestions...[/dim]")
+                    suggestions = self.pair_programmer.suggest_completion(content, 0, self.current_model)
+                    
+                    if not suggestions:
+                        return "💭 No suggestions at this time"
+                    
+                    return self.pair_programmer.format_suggestion(suggestions[0])
+                except Exception as e:
+                    return f"❌ Error: {str(e)}"
+            
+            # --- Refactor ---
+            if cmd == "refactor" or cmd.startswith("refactor "):
+                if not self.pair_programmer:
+                    return "❌ Pair programmer not available"
+                
+                filepath = command.split(maxsplit=1)[1] if len(command.split()) > 1 else None
+                
+                if not filepath and self.pair_programmer.current_session:
+                    filepath = self.pair_programmer.current_session.filepath
+                
+                if not filepath:
+                    return "Usage: /refactor <file> or start a pair session first"
+                
+                try:
+                    content, error = self.code_agent.read_file(filepath) if self.code_agent else ("", "No code agent")
+                    if error:
+                        return f"❌ {error}"
+                    
+                    console.print("[dim]Generating refactoring suggestions...[/dim]")
+                    suggestions = self.pair_programmer.suggest_refactor(content, "", self.current_model)
+                    
+                    if not suggestions:
+                        return "✅ Code looks good, no refactoring needed"
+                    
+                    return self.pair_programmer.format_suggestion(suggestions[0])
+                except Exception as e:
+                    return f"❌ Error: {str(e)}"
+            
+            # ================================================================
+            # WORKFLOW ENGINE
+            # ================================================================
+            
+            # --- List Workflows ---
+            if cmd == "workflow" or cmd == "workflows" or cmd == "workflow list":
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                return self.workflow_engine.format_list()
+            
+            # --- Create Workflow ---
+            if cmd.startswith("workflow create "):
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                
+                name = command.split(maxsplit=2)[2] if len(command.split()) > 2 else "New Workflow"
+                workflow = self.workflow_engine.create_workflow(name)
+                return f"✅ Created workflow: {workflow.name}\nID: {workflow.workflow_id}\n\n💡 Add steps with `/workflow add-step {workflow.workflow_id} <type> <name>`"
+            
+            # --- Run Workflow ---
+            if cmd.startswith("workflow run "):
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                
+                workflow_id = command.split()[2] if len(command.split()) > 2 else ""
+                if not workflow_id:
+                    return "Usage: /workflow run <workflow_id>"
+                
+                try:
+                    console.print(f"[dim]Running workflow {workflow_id}...[/dim]")
+                    result = self.workflow_engine.run_workflow(workflow_id)
+                    
+                    if "error" in result:
+                        return f"❌ {result['error']}"
+                    
+                    return f"✅ Workflow {result.get('status', 'completed')}\n\nResults:\n" + "\n".join([
+                        f"  • {r['step']}: {r.get('status', 'done')}"
+                        for r in result.get('results', [])
+                    ])
+                except Exception as e:
+                    return f"❌ Error: {str(e)}"
+            
+            # --- Show Workflow ---
+            if cmd.startswith("workflow show "):
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                
+                workflow_id = command.split()[2] if len(command.split()) > 2 else ""
+                return self.workflow_engine.format_workflow(workflow_id)
+            
+            # --- Pre-built Workflows ---
+            if cmd == "workflow code-review":
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                workflow = self.workflow_engine.create_code_review_workflow()
+                return f"✅ Created code review workflow: {workflow.workflow_id}\nUse `/workflow run {workflow.workflow_id}` to execute"
+            
+            if cmd == "workflow deploy":
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                workflow = self.workflow_engine.create_deploy_workflow()
+                return f"✅ Created deployment workflow: {workflow.workflow_id}\nUse `/workflow run {workflow.workflow_id}` to execute"
+            
+            if cmd == "workflow standup":
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                workflow = self.workflow_engine.create_daily_standup_workflow()
+                return f"✅ Created standup workflow: {workflow.workflow_id}\nUse `/workflow run {workflow.workflow_id}` to execute"
+
+            if cmd == "workflow test":
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                workflow = self.workflow_engine.create_test_workflow()
+                return f"✅ Created test workflow: {workflow.workflow_id}\nUse `/workflow run {workflow.workflow_id}` to execute"
+
+            if cmd == "workflow docs":
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                workflow = self.workflow_engine.create_documentation_workflow()
+                return f"✅ Created documentation workflow: {workflow.workflow_id}\nUse `/workflow run {workflow.workflow_id}` to execute"
+
+            if cmd == "workflow security":
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                workflow = self.workflow_engine.create_security_audit_workflow()
+                return f"✅ Created security audit workflow: {workflow.workflow_id}\nUse `/workflow run {workflow.workflow_id}` to execute"
+
+            if cmd == "workflow release":
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                workflow = self.workflow_engine.create_release_workflow()
+                return f"✅ Created release workflow: {workflow.workflow_id}\nUse `/workflow run {workflow.workflow_id}` to execute"
+
+            if cmd == "workflow refactor":
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                workflow = self.workflow_engine.create_refactor_workflow()
+                return f"✅ Created refactor analysis workflow: {workflow.workflow_id}\nUse `/workflow run {workflow.workflow_id}` to execute"
+
+            if cmd == "workflow deps":
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                workflow = self.workflow_engine.create_dependency_check_workflow()
+                return f"✅ Created dependency check workflow: {workflow.workflow_id}\nUse `/workflow run {workflow.workflow_id}` to execute"
+
+            if cmd == "workflow changelog":
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                workflow = self.workflow_engine.create_changelog_workflow()
+                return f"✅ Created changelog workflow: {workflow.workflow_id}\nUse `/workflow run {workflow.workflow_id}` to execute"
+
+            if cmd == "workflow health":
+                if not self.workflow_engine:
+                    return "❌ Workflow engine not available"
+                workflow = self.workflow_engine.create_health_check_workflow()
+                return f"✅ Created health check workflow: {workflow.workflow_id}\nUse `/workflow run {workflow.workflow_id}` to execute"
+
+            
+            # ================================================================
+            # KNOWLEDGE BASE (Smart RAG)
+            # ================================================================
+            
+            # --- Knowledge Base Status ---
+            if cmd == "kb" or cmd == "knowledge" or cmd == "kb status":
+                if not self.smart_rag:
+                    return "❌ Knowledge base not available (install: pip install sentence-transformers numpy)"
+                return self.smart_rag.format_stats()
+            
+            # --- Add to Knowledge Base ---
+            if cmd.startswith("kb add "):
+                if not self.smart_rag:
+                    return "❌ Knowledge base not available"
+                
+                target = command.split(maxsplit=2)[2] if len(command.split()) > 2 else ""
+                if not target:
+                    return "Usage: /kb add <file or directory>"
+                
+                try:
+                    from pathlib import Path
+                    path = Path(target)
+                    
+                    if path.is_file():
+                        doc_id = self.smart_rag.add_file(target)
+                        if doc_id:
+                            return f"✅ Added to knowledge base: {doc_id}"
+                        return "❌ Failed to add file"
+                    
+                    elif path.is_dir():
+                        console.print(f"[dim]Indexing directory {target}...[/dim]")
+                        added = self.smart_rag.add_directory(target)
+                        return f"✅ Added {len(added)} files to knowledge base"
+                    
+                    else:
+                        return f"❌ Path not found: {target}"
+                        
+                except Exception as e:
+                    return f"❌ Error: {str(e)}"
+            
+            # --- Search Knowledge Base ---
+            if cmd.startswith("kb search ") or cmd.startswith("kb find "):
+                if not self.smart_rag:
+                    return "❌ Knowledge base not available"
+                
+                query = command.split(maxsplit=2)[2] if len(command.split()) > 2 else ""
+                if not query:
+                    return "Usage: /kb search <query>"
+                
+                try:
+                    results = self.smart_rag.search(query, top_k=5)
+                    
+                    if not results:
+                        return f"❌ No results found for: {query}"
+                    
+                    lines = [f"🔍 **Knowledge Base Results for:** _{query}_\n"]
+                    for i, result in enumerate(results, 1):
+                        source = result.metadata.get('filename', result.doc_id)
+                        snippet = result.content[:150] + "..." if len(result.content) > 150 else result.content
+                        lines.append(f"**{i}. {source}** (score: {result.score:.2f})")
+                        lines.append(f"   _{snippet}_")
+                        lines.append("")
+                    
+                    return "\n".join(lines)
+                except Exception as e:
+                    return f"❌ Error: {str(e)}"
+            
+            # --- List Documents ---
+            if cmd == "kb list" or cmd == "kb docs":
+                if not self.smart_rag:
+                    return "❌ Knowledge base not available"
+                
+                docs = self.smart_rag.list_documents()
+                if not docs:
+                    return "📚 Knowledge base is empty. Use `/kb add <file>` to add documents."
+                
+                lines = ["📚 **Knowledge Base Documents:**\n"]
+                for doc in docs[:20]:
+                    lines.append(f"  • **{doc['doc_id']}** - {doc.get('filename', 'unknown')} ({doc['chunks']} chunks)")
+                
+                if len(docs) > 20:
+                    lines.append(f"\n_...and {len(docs) - 20} more_")
+                
+                return "\n".join(lines)
+            
+            # --- Ask with Knowledge ---
+            if cmd.startswith("kb ask ") or cmd.startswith("ask-kb "):
+                if not self.smart_rag:
+                    return "❌ Knowledge base not available"
+                
+                query = command.split(maxsplit=2)[2] if len(command.split()) > 2 else ""
+                if not query:
+                    return "Usage: /kb ask <question>"
+                
+                try:
+                    # Get relevant context
+                    context = self.smart_rag.get_context_for_query(query)
+                    
+                    if not context:
+                        return "❌ No relevant context found in knowledge base"
+                    
+                    # Query AI with context
+                    prompt = f"""Answer this question using ONLY the context provided below.
+If the context doesn't contain the answer, say so.
+
+CONTEXT:
+{context}
+
+QUESTION: {query}
+
+ANSWER:"""
+                    
+                    console.print("[dim]Querying with knowledge context...[/dim]")
+                    answer = self.ai.query(self.current_model, prompt)
+                    
+                    return f"🧠 **Answer from Knowledge Base:**\n\n{answer}"
+                except Exception as e:
+                    return f"❌ Error: {str(e)}"
+            
+            # --- Clear Knowledge Base ---
+            if cmd == "kb clear":
+                if not self.smart_rag:
+                    return "❌ Knowledge base not available"
+                self.smart_rag.clear()
+                return "✅ Knowledge base cleared"
+
             if cmd.startswith("cloud "):
                 if not self.cloud_integration:
                     return "❌ Cloud Integration module not available"
@@ -3600,13 +5112,72 @@ def run_interactive_mode() -> int:
         return 1
 
 def main() -> int:
-    """Start the interactive Aether AI terminal. Returns exit code."""
-    if "--cli" in sys.argv:
+    """Start the interactive AetherAI terminal.
+    
+    This is the main entry point for the CLI.
+    Returns exit code (0 for success, non-zero for errors).
+    """
+    import argparse
+    
+    # ASCII Art for --version
+    VERSION_BANNER = r"""
+     _    _____ _____ _   _ _____ ____      _    ___ 
+    / \  | ____|_   _| | | | ____|  _ \    / \  |_ _|
+   / _ \ |  _|   | | | |_| |  _| | |_) |  / _ \  | | 
+  / ___ \| |___  | | |  _  | |___|  _ <  / ___ \ | | 
+ /_/   \_\_____| |_| |_| |_|_____|_| \_\/_/   \_\___|
+"""
+    
+    parser = argparse.ArgumentParser(
+        prog='aetherai',
+        description='AetherAI - Production-ready, secure, multi-model AI terminal assistant',
+        epilog='For more info: https://github.com/KunjShah95/NEXUS-AI.io',
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    
+    parser.add_argument(
+        '-v', '--version',
+        action='store_true',
+        help='Show version information and exit'
+    )
+    
+    parser.add_argument(
+        '--cli',
+        action='store_true',
+        help='Run in headless CLI mode (for VS Code extension)'
+    )
+    
+    parser.add_argument(
+        '--no-banner',
+        action='store_true',
+        help='Skip the startup banner'
+    )
+    
+    parser.add_argument(
+        '--model', '-m',
+        choices=['gemini', 'groq', 'ollama', 'huggingface', 'chatgpt', 'mcp'],
+        help='Start with a specific AI model'
+    )
+    
+    args = parser.parse_args()
+    
+    # Handle version flag
+    if args.version:
+        console.print(f"[bold cyan]{VERSION_BANNER}[/bold cyan]")
+        console.print(f"[bold white]AetherAI[/bold white] v[bold green]{VERSION}[/bold green]")
+        console.print(f"[dim]Author: Kunj Shah[/dim]")
+        console.print(f"[dim]Python: {sys.version.split()[0]} | Platform: {sys.platform}[/dim]")
+        console.print(f"[dim]Install: pip install aetherai[/dim]")
+        return 0
+    
+    # Run in CLI mode (headless for VS Code extension)
+    if args.cli:
         return run_cli_mode()
-
-    # Default to interactive CLI with prompt_toolkit
+    
+    # Run interactive mode
     return run_interactive_mode()
 
 
 if __name__ == "__main__":
     sys.exit(main())
+

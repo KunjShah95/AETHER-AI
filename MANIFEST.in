@@ -1,0 +1,46 @@
+# Manifest file for building source distributions
+# This ensures all necessary files are included in the sdist
+
+# Include documentation files
+include README.md
+include LICENSE
+include CHANGELOG.md
+include CONTRIBUTING.md
+include CODE_OF_CONDUCT.md
+include SECURITY.md
+
+# Include configuration files
+include pyproject.toml
+include setup.cfg
+include .env.example
+include .env.template
+
+# Include the Makefile for development
+include Makefile
+
+# Include all Python source files
+recursive-include terminal *.py py.typed *.yaml *.json *.txt
+
+# Include test files
+recursive-include terminal/tests *.py
+
+# Include plugin files if any
+recursive-include terminal/plugins *.py *.yaml *.json
+
+# Exclude build artifacts and caches
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .DS_Store
+global-exclude *.egg-info
+global-exclude .git*
+
+# Exclude development/frontend files from package
+prune frontend
+prune extension
+prune go-terminal
+prune documentation-site
+prune docs
+prune node_modules
+prune .venv
+prune .github

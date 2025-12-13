@@ -1,9 +1,11 @@
-# 🚀 NEXUS AI Terminal Assistant
+# 🚀 NEXUS AI Terminal Assistant (AetherAI)
 
+[![PyPI version](https://img.shields.io/pypi/v/aetherai?color=blue&logo=python)](https://pypi.org/project/aetherai/)
+[![Python](https://img.shields.io/pypi/pyversions/aetherai)](https://pypi.org/project/aetherai/)
+[![Downloads](https://img.shields.io/pypi/dm/aetherai)](https://pypi.org/project/aetherai/)
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen)](https://kunjshah95.github.io/NEXUS-AI.io/)
-[![Version](https://img.shields.io/badge/Version-3.0.1-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.0.0-blue)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-green)](https://www.python.org/)
 
 Production‑ready, secure, multi‑model AI for your terminal. Switch between Google Gemini, Groq, Ollama (local), HuggingFace, ChatGPT (OpenAI), and MCP with one CLI, enriched by security controls, utilities, and an extensible modular architecture.
 
@@ -31,46 +33,69 @@ Production‑ready, secure, multi‑model AI for your terminal. Switch between G
 
 ## Installation
 
-Choose the option that fits your environment.
+### 🚀 Quick Install (Recommended)
 
-### Option A: One‑click OS scripts (consolidated)
+```bash
+# Using pip
+pip install aetherai
 
-- We now provide a single canonical installer per platform under `dist/`.
-- Recommended files:
+# Using uv (faster!)
+uv pip install aetherai
+```
+
+After installation, run the assistant:
+```bash
+aetherai
+# or
+nexus-ai
+```
+
+### 📦 Installation Extras
+
+Choose the features you need:
+
+```bash
+# Lightweight install (core only - ~100MB)
+pip install aetherai
+
+# Full experience (voice, RAG, ML, server - like original)
+pip install "aetherai[full]"
+
+# Specific features
+pip install "aetherai[voice]"      # Voice input/output
+pip install "aetherai[rag]"        # RAG knowledge base
+pip install "aetherai[ml]"         # HuggingFace transformers
+pip install "aetherai[server]"     # FastAPI web server
+pip install "aetherai[db]"         # Database integrations
+
+# Development
+pip install "aetherai[dev]"        # Testing & linting tools
+pip install "aetherai[all]"        # Everything including dev tools
+```
+
+### 🔧 Non-OS scripts (consolidated)
+
+- We also provide platform installers under `dist/`:
   - Windows: `dist/install_windows.bat`
   - macOS: `dist/install_mac.sh`
   - Linux: `dist/install_linux.sh`
 
-Before running an installer, verify the SHA256 checksum in `dist/SHA256SUMS.txt`:
-
-Windows (PowerShell):
-
-```powershell
-Get-FileHash -Algorithm SHA256 .\dist\install_windows.bat
-```
-
-macOS / Linux:
-
-```bash
-sha256sum dist/install_mac.sh
-```
-
-If checksums match the entries in `dist/SHA256SUMS.txt`, you can run the installer.
-
-### Option B: From source (recommended for development)
+### 🛠️ From source (for development)
 
 ```bash
 # Clone
 git clone https://github.com/KunjShah95/NEXUS-AI.io.git
 cd NEXUS-AI.io
 
-# Install dependencies
-pip install -r requirements.txt
+# Install in editable mode with dev dependencies
+pip install -e ".[dev]"
 
 # Configure environment
 cp .env.example .env   # set your API keys; see below
 
 # Run
+aetherai
+# or directly
 python terminal/main.py
 ```
 

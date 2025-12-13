@@ -1,7 +1,8 @@
-"""Terminal package initializer for AetherAI.
+"""Terminal package for AetherAI.
 
-This file makes the `terminal` directory a Python package so the console
-script can import `terminal.main` after an editable install.
+This package contains the main terminal application logic, including
+the interactive CLI, AI model integrations, developer tools, and utilities.
 """
+
 __all__ = ["main"]
-__version__ = "0.1.0"
+__version__ = "1.0.0"
