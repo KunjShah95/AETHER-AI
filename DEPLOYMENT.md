@@ -5,11 +5,13 @@ This guide addresses common frontend deployment issues and provides solutions fo
 ## 🔧 Fixed Issues
 
 ### 1. **Production Dockerfile Added**
+
 - Created `frontend/Dockerfile` for production deployment
 - Multi-stage build with Node.js builder and Nginx server
 - Optimized for production with proper caching
 
 ### 2. **Vite Configuration Enhanced**
+
 - Updated `frontend/vite.config.ts` with:
   - Better chunk splitting for optimal loading
   - Proper build optimization
@@ -17,16 +19,19 @@ This guide addresses common frontend deployment issues and provides solutions fo
   - Environment variable handling
 
 ### 3. **Vercel Configuration Fixed**
+
 - Updated `vercel.json` with proper monorepo support
 - Added security headers
 - Improved build command using `npm ci` instead of `npm install`
 - Added redirects for API routes
 
 ### 4. **Package Scripts Enhanced**
+
 - Added `build:check`, `lint:fix`, `type-check`, and `clean` scripts
 - Improved build process with TypeScript checking
 
 ### 5. **Docker Optimization**
+
 - Created `.dockerignore` file to reduce build context
 - Proper nginx configuration with gzip compression and caching
 
@@ -75,7 +80,9 @@ npm run build
 ## 🛠️ Common Issues and Solutions
 
 ### Issue 1: Build Fails with TypeScript Errors
+
 **Solution:** Run type checking before build
+
 ```bash
 cd frontend
 npm run type-check
@@ -83,27 +90,34 @@ npm run build
 ```
 
 ### Issue 2: Vercel Build Hangs or Fails
+
 **Solution:** Ensure Node.js version compatibility
+
 - Vercel uses Node.js 18.x by default
 - Check `package.json` for compatibility
 
 ### Issue 3: Environment Variables Not Working
+
 **Solution:** Use Vite environment variable prefixes
+
 - Variables must start with `VITE_` to be accessible in the browser
 - Update your environment variables:
+
 ```env
 VITE_API_URL=your_api_url
 VITE_APP_NAME=NEXUS AI
 ```
 
 ### Issue 4: Routing Issues (404 on Refresh)
+
 **Solution:** Ensure SPA routing configuration
+
 - Vercel configuration includes proper rewrites
 - Nginx configuration handles client-side routing
 
 ## 📁 Project Structure
 
-```
+```text
 NEXUS-AI.io/
 ├── frontend/
 │   ├── src/                    # Source code
@@ -121,7 +135,7 @@ NEXUS-AI.io/
 
 ## 🔍 Pre-deployment Checklist
 
-- [ ] Node.js version is 18+ 
+- [ ] Node.js version is 18+
 - [ ] All dependencies are compatible
 - [ ] TypeScript compilation passes
 - [ ] Environment variables are properly prefixed with `VITE_`
@@ -132,6 +146,7 @@ NEXUS-AI.io/
 ## 🐛 Troubleshooting
 
 ### Build Fails
+
 ```bash
 # Clear cache and reinstall
 cd frontend
@@ -146,6 +161,7 @@ npm run lint
 ```
 
 ### Docker Issues
+
 ```bash
 # Build with verbose output
 docker build --no-cache -t nexus-ai-frontend ./frontend
@@ -155,6 +171,7 @@ docker logs <container-id>
 ```
 
 ### Vercel Issues
+
 1. Check build logs in Vercel dashboard
 2. Ensure `vercel.json` is in the root directory
 3. Verify Node.js version compatibility
@@ -177,6 +194,7 @@ VITE_APP_NAME=NEXUS AI
 ## 🎯 Performance Optimization
 
 The configuration includes:
+
 - **Code splitting** for optimal loading
 - **Gzip compression** via Nginx
 - **Asset caching** with long-term cache headers
@@ -186,6 +204,7 @@ The configuration includes:
 ## 📞 Support
 
 If you continue to experience issues:
+
 1. Check the build logs for specific error messages
 2. Verify all dependencies are compatible
 3. Ensure proper environment variable configuration
