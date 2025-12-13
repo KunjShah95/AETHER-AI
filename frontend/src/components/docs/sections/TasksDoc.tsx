@@ -65,7 +65,7 @@ const TasksDoc = () => {
                     Task Management System
                 </h1>
                 <p className="text-lg text-slate-300">
-                    Stay organized and productive with NEXUS AI's built-in task management system, accessible directly from your terminal.
+                    Stay organized and productive with AETHER AI's built-in task management system, accessible directly from your terminal.
                 </p>
             </motion.div>
 

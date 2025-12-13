@@ -31,7 +31,7 @@ const GettingStartedDoc = () => {
                     Getting Started
                 </h1>
                 <p className="text-lg text-slate-300">
-                    Get NEXUS AI up and running in minutes with this comprehensive guide.
+                    Get AETHER AI up and running in minutes with this comprehensive guide.
                 </p>
             </motion.div>
 

@@ -9,9 +9,9 @@ export function Footer() {
                 <div className="flex flex-col items-center md:items-start">
                     <div className="flex items-center gap-2 mb-2">
                         <div className="h-8 w-8 bg-terminal-cyan rounded-lg flex items-center justify-center">
-                            <span className="text-black font-bold text-sm">N</span>
+                            <span className="text-black font-bold text-sm">A</span>
                         </div>
-                        <span className="text-white font-bold text-xl tracking-wide">NEXUS AI</span>
+                        <span className="text-white font-bold text-xl tracking-wide">AETHER AI</span>
                     </div>
                     <p className="text-neutral-500 text-sm text-center md:text-left max-w-xs">
                         The next-generation AI terminal assistant. Open source, secure, and local.

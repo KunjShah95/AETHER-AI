@@ -64,7 +64,7 @@ const ModelsDoc = () => {
                     AI Models
                 </h1>
                 <p className="text-lg text-slate-300">
-                    NEXUS AI supports a wide range of AI models, allowing you to choose the best tool for the job.
+                    AETHER AI supports a wide range of AI models, allowing you to choose the best tool for the job.
                 </p>
             </motion.div>
 
@@ -199,7 +199,7 @@ ollama pull mistral`} />
                                 3
                             </span>
                             <div>
-                                <strong className="text-white">Use in NEXUS:</strong>
+                                <strong className="text-white">Use in AETHER:</strong>
                                 <div className="mt-2 space-y-2">
                                     <div className="flex items-center gap-2">
                                         <code className="px-2 py-1 bg-slate-800 rounded text-purple-400 text-sm">/ollama-models</code>

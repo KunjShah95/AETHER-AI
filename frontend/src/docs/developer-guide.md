@@ -1,6 +1,6 @@
 # Developer Guide
 
-We welcome contributions to NEXUS AI! This guide will help you set up your development environment and understand the project structure.
+We welcome contributions to AETHER AI! This guide will help you set up your development environment and understand the project structure.
 
 ## Development Setup
 

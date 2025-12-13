@@ -23,13 +23,14 @@ let outputChannel: vscode.OutputChannel;
 let logLines: string[] = [];
 
 export function activate(context: vscode.ExtensionContext) {
-  outputChannel = vscode.window.createOutputChannel('Nexus AI Terminal');
+  outputChannel = vscode.window.createOutputChannel('Aether AI Terminal');
   context.subscriptions.push(outputChannel);
 
-  registerCommand(context, 'nexusAi.startAssistant', startAssistant);
-  registerCommand(context, 'nexusAi.stopAssistant', stopAssistant);
-  registerCommand(context, 'nexusAi.sendQuickCommand', sendQuickCommand);
-  registerCommand(context, 'nexusAi.openAssistantPanel', () => openAssistantPanel(context));
+  registerCommand(context, 'aetherAi.startAssistant', startAssistant);
+  registerCommand(context, 'aetherAi.stopAssistant', stopAssistant);
+  registerCommand(context, 'aetherAi.sendQuickCommand', sendQuickCommand);
+  registerCommand(context, 'aetherAi.openAssistantPanel', () => openAssistantPanel(context));
+  registerCommand(context, 'aetherAi.insertTimestamp', insertTimestamp);
 
   const autoStart = getConfig('autoStart', false);
   if (autoStart) {
@@ -53,18 +54,18 @@ function registerCommand(
 }
 
 function getConfig<T>(key: string, defaultValue: T): T {
-  return vscode.workspace.getConfiguration('nexusAiAssistant').get<T>(key, defaultValue) || defaultValue;
+  return vscode.workspace.getConfiguration('aetherAiAssistant').get<T>(key, defaultValue) || defaultValue;
 }
 
 async function startAssistant() {
   if (assistantProcess) {
-    vscode.window.showInformationMessage('The Nexus AI assistant is already running.');
+    vscode.window.showInformationMessage('The Aether AI assistant is already running.');
     return;
   }
 
   const folders = vscode.workspace.workspaceFolders;
   if (!folders || folders.length === 0) {
-    vscode.window.showErrorMessage('Open the workspace that contains the Nexus AI repository.');
+    vscode.window.showErrorMessage('Open the workspace that contains the Aether AI repository.');
     return;
   }
 
@@ -146,7 +147,7 @@ async function sendQuickCommand() {
       detail: command.command
     })),
     {
-      placeHolder: 'Choose a quick Nexus AI command'
+      placeHolder: 'Choose a quick Aether AI command'
     }
   );
 
@@ -208,6 +209,16 @@ function updatePanelLog() {
 
 function updateStatus(status: string) {
   AssistantPanel.currentPanel?.postStatus(status);
+}
+
+function insertTimestamp() {
+  const editor = vscode.window.activeTextEditor;
+  if (editor) {
+    const timestamp = new Date().toISOString();
+    editor.edit(editBuilder => {
+      editBuilder.insert(editor.selection.active, timestamp);
+    });
+  }
 }
 
 export function deactivate() {

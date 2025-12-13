@@ -16,7 +16,7 @@ import os
 import json
 import asyncio
 import subprocess
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, Tuple
 from dataclasses import dataclass, field
 from pathlib import Path
 from datetime import datetime
@@ -431,5 +431,4 @@ class MCPManager:
         return "\n".join(lines)
 
 
-# Tuple import for type hints
-from typing import Tuple
+

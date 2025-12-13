@@ -11,7 +11,7 @@ const CommandsDoc = () => {
                 { cmd: '/help', desc: 'Show comprehensive help menu' },
                 { cmd: '/status', desc: 'Display current model and system status' },
                 { cmd: '/clear', desc: 'Clear the terminal screen' },
-                { cmd: '/exit', desc: 'Exit the NEXUS AI terminal' },
+                { cmd: '/exit', desc: 'Exit the AETHER AI terminal' },
                 { cmd: '/sysinfo', desc: 'Show detailed system information' },
                 { cmd: '/config', desc: 'Display current configuration' },
             ]
@@ -57,6 +57,18 @@ const CommandsDoc = () => {
                 { cmd: '/aifind [keyword]', desc: 'AI-powered file search' },
                 { cmd: '/explore', desc: 'Explore codebase' },
             ]
+        },
+        {
+            title: 'Advanced AI Features',
+            icon: Code,
+            color: 'from-pink-500 to-rose-500',
+            commands: [
+                { cmd: '/persona [name]', desc: 'Switch AI persona' },
+                { cmd: '/web [url]', desc: 'Web agent browse' },
+                { cmd: '/docker init', desc: 'Dockerize project' },
+                { cmd: '/dashboard', desc: 'Open Mission Control' },
+                { cmd: '/voice', desc: 'Toggle Voice Mode' },
+            ]
         }
     ];
 
@@ -70,7 +82,7 @@ const CommandsDoc = () => {
                     Commands Reference
                 </h1>
                 <p className="text-lg text-slate-300">
-                    Complete guide to all available commands in NEXUS AI Terminal Assistant.
+                    Complete guide to all available commands in AETHER AI Terminal Assistant.
                 </p>
             </motion.div>
 

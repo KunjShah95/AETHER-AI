@@ -4,14 +4,14 @@ import os
 import json
 import psutil
 
-app = FastAPI(title="Nexus AI Admin")
+app = FastAPI(title="Aether AI Admin")
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     return """
     <html>
         <head>
-            <title>Nexus AI Admin</title>
+            <title>Aether AI Admin</title>
             <style>
                 body { font-family: sans-serif; padding: 20px; background: #1a1a1a; color: #fff; }
                 .card { background: #333; padding: 20px; margin: 10px 0; border-radius: 8px; }
@@ -19,7 +19,7 @@ async def read_root():
             </style>
         </head>
         <body>
-            <h1>Nexus AI Admin Panel</h1>
+            <h1>Aether AI Admin Panel</h1>
             <div class="card">
                 <h2>System Status</h2>
                 <div id="status">Loading...</div>

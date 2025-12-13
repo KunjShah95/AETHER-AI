@@ -515,8 +515,58 @@ Respond in JSON format:
             results = []
             for step in plan.get("steps", []):
                 task.logs.append(f"Executing: {step}")
-                # Would implement actual step execution here
-                results.append(f"✓ {step}")
+                
+                # Simple heuristic to determine action
+                try:
+                    # Ask AI how to execute this step
+                    exec_prompt = f"""How should I execute this step?
+STEP: {step}
+WORKSPACE: {self.workspace}
+
+Available Actions:
+1. EDIT <file> <instruction>
+2. CREATE <file> <content>
+3. RUN <command>
+4. ANALYZE <directory>
+
+Respond with ONE line starting with the Action keyword."""
+                    
+                    action_response = self.ai_query(model, exec_prompt).strip()
+                    
+                    if action_response.startswith("EDIT"):
+                        # Parse: EDITfile.py instruction
+                        parts = action_response.split(maxsplit=2)
+                        if len(parts) >= 3:
+                            filepath, instr = parts[1], parts[2]
+                            edit = self.create_edit_from_ai(filepath, instr, model)
+                            if edit:
+                                self.apply_edit(edit, confirm=False)
+                                results.append(f"✓ Edited {filepath}")
+                            else:
+                                results.append(f"⚠ Failed to edit {filepath}")
+                    
+                    elif action_response.startswith("CREATE"):
+                        parts = action_response.split(maxsplit=2)
+                        if len(parts) >= 3:
+                            filepath, content = parts[1], parts[2]
+                            self.write_file(filepath, content)
+                            results.append(f"✓ Created {filepath}")
+                            
+                    elif action_response.startswith("RUN"):
+                        cmd = action_response[4:]
+                        # Safety check! only allow safe commands or ask confirmation? 
+                        # For autopilot, we'll strip dangerous ones
+                        if not any(re.search(p, cmd) for p in self.DANGEROUS_PATTERNS):
+                             subprocess.run(cmd, shell=True, cwd=self.workspace, capture_output=True)
+                             results.append(f"✓ Ran: {cmd}")
+                        else:
+                             results.append(f"⚠ Skipped dangerous command: {cmd}")
+
+                    else:
+                        results.append(f"✓ Analyzed: {step}")
+                        
+                except Exception as e:
+                    results.append(f"⚠ Step failed: {str(e)}")
             
             task.status = "completed"
             task.result = "\n".join(results) if results else plan.get("understanding", "Task analyzed")

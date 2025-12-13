@@ -45,3 +45,32 @@ Improve your coding skills or take a break.
 - `/myactivity`: View activity log
 - `/listusers`: List all users (admin)
 - `/resetpw [user] [newpass]`: Reset password (admin)
+
+## Autonomous Agents & Personas
+
+AETHER AI includes a powerful multi-agent system.
+
+- **Personas**: Switch between `security`, `frontend`, `backend`, `qa`, and `architect` personas to get specialized assistance.
+  - `/persona security`: Focus on vulnerability analysis.
+  - `/persona qa`: Focus on test generation and bug finding.
+
+## Web Agent & Research
+
+The built-in Web Agent can browse the internet to gather real-time information.
+
+- **Browsing**: `/web https://example.com` - Read and summarize a specific page.
+- **Research**: `/research "latest react patterns"` - Synthesize information from multiple sources.
+
+## DevOps & Docker capabilities
+
+Manage your development environment directly from the terminal.
+
+- **Auto-Docker**: `/docker init` analyzes your project and creates the perfect `Dockerfile` and `docker-compose.yml`.
+- **Management**: `/docker up`, `/docker down`, `/docker logs` to control containers.
+
+## Workflow Automation
+
+Use AutoPilot to autonomously plan and execute complex multi-step tasks.
+
+- `/autopilot "Refactor the login page to use hooks"`: The AI will plan, edit files, and verify changes.
+

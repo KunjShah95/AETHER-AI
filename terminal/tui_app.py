@@ -6,17 +6,17 @@ from rich.text import Text
 from datetime import datetime
 import asyncio
 
-# Import NexusAI from main (assuming main.py is in the same package or path)
+# Import AetherAI from main (assuming main.py is in the same package or path)
 # We need to handle imports carefully to avoid circular dependency if main imports this
 try:
-    from terminal.main import NexusAI
+    from terminal.main import AetherAI
     from terminal.dashboard_tui import SystemMonitor
 except ImportError:
     # Fallback for direct execution or different path structure
     import sys
     import os
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from terminal.main import NexusAI
+    from terminal.main import AetherAI
     from terminal.dashboard_tui import SystemMonitor
 
 class ChatView(Container):
@@ -36,7 +36,7 @@ class ToolsView(Container):
             yield Button("List Models", id="btn_models", variant="default")
             yield Button("Clear Chat", id="btn_clear", variant="error")
 
-class NexusTUI(App):
+class AetherTUI(App):
     """The Unified Aether AI Terminal Interface."""
     
     CSS = """
@@ -95,7 +95,7 @@ class NexusTUI(App):
         yield Footer()
 
     def on_mount(self) -> None:
-        """Initialize NexusAI when app starts."""
+        """Initialize AetherAI when app starts."""
         self.query_one(RichLog).write(Text("Initializing AETHER AI...", style="bold green"))
         
         # Initialize AI in background to not block UI
@@ -104,7 +104,7 @@ class NexusTUI(App):
     async def init_ai(self):
         """Async initialization of AI."""
         try:
-            self.ai = NexusAI(quiet=True)
+            self.ai = AetherAI(quiet=True)
             log = self.query_one(RichLog)
             log.write(Text(f"Welcome to AETHER AI v3.1", style="bold cyan"))
             log.write(Text(f"Current Model: {self.ai.current_model.upper()}", style="yellow"))
@@ -132,7 +132,7 @@ class NexusTUI(App):
             log.clear()
             return
 
-        # Process input via NexusAI
+        # Process input via AetherAI
         if hasattr(self, 'ai'):
             # Show thinking indicator
             log.write(Text("Thinking...", style="dim blue"))
@@ -175,5 +175,5 @@ class NexusTUI(App):
         self.query_one(RichLog).clear()
 
 if __name__ == "__main__":
-    app = NexusTUI()
+    app = AetherTUI()
     app.run()

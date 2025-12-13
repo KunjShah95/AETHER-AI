@@ -136,7 +136,9 @@ try:
     from terminal.mcp_manager import MCPManager
     from terminal.streaming import StreamingHandler, PipeInputHandler
     from terminal.skills_manager import SkillsManager
+    from terminal.skills_manager import SkillsManager
     from terminal.web_search import WebSearcher, set_last_search_results, get_last_search_results
+    from terminal.web_agent import WebAgent
 except ImportError:
     try:
         from context_engine import ContextEngine, create_default_templates
@@ -145,6 +147,7 @@ except ImportError:
         from streaming import StreamingHandler, PipeInputHandler
         from skills_manager import SkillsManager
         from web_search import WebSearcher, set_last_search_results, get_last_search_results
+        from web_agent import WebAgent
     except ImportError:
         ContextEngine = None
         DeveloperTools = None
@@ -963,9 +966,11 @@ class UserManager:
         _run_in_background(_do_update)
 
 # --- Core Application ---
-class NexusAI:
+# --- Core Application ---
+class AetherAI:
     def __init__(self, quiet: bool = False):
         self.user_manager = UserManager()
+
         self.ai = AIManager()
         self.security = SecurityManager()
         self.current_model = self._load_config()
@@ -998,6 +1003,7 @@ class NexusAI:
         self.persona_manager = PersonaManager() if PersonaManager else None
         self.persona_manager = PersonaManager() if PersonaManager else None
         self.network_tools = NetworkTools() if NetworkTools else None
+        self.web_agent = WebAgent() if WebAgent else None
         self.cloud_integration = CloudIntegration() if CloudIntegration else None
         self.blockchain = BlockchainManager() if BlockchainManager else None
         self.ml_ops = MLOpsManager() if MLOpsManager else None
@@ -3821,15 +3827,8 @@ class NexusAI:
                     return "Usage: /run [command]"
                 return self.execute_command(parts[1])
 
-            if cmd == "dashboard":
-                if NexusDashboard:
-                    try:
-                        app = NexusDashboard()
-                        app.run()
-                        return f" Dashboard closed"
-                    except Exception as e:
-                        return f" Error running dashboard: {e}"
-                return " Dashboard module not available"
+            # Old dashboard command removed in favor of new subprocess-based one
+
 
             if cmd == "games":
                 if GamesTUI:
@@ -4653,6 +4652,24 @@ class NexusAI:
                 # For now just show usage - actual code would come from input
                 return f"📋 Ready to execute {language} code.\nPaste your code and type `/execute` to run it in sandbox."
             
+            # --- AutoPilot ---
+            if cmd.startswith("autopilot ") or cmd.startswith("agent task "):
+                if not self.code_agent:
+                    return "❌ Code agent not available"
+                
+                parts = command.split(maxsplit=2)
+                description = parts[2] if len(parts) > 2 else ""
+                if not description:
+                    return "Usage: /autopilot <task description>"
+                
+                try:
+                    console.print(f"[bold magenta]🚀 Starting AutoPilot Task: {description}[/bold magenta]")
+                    task = self.code_agent.create_task(description)
+                    result = self.code_agent.execute_task(task, self.current_model)
+                    return f"✅ AutoPilot Complete\n\n{result}"
+                except Exception as e:
+                    return f"❌ Error: {str(e)}"
+            
             # ================================================================
             # PAIR PROGRAMMING
             # ================================================================
@@ -4998,6 +5015,68 @@ ANSWER:"""
                     return self.cloud_integration.deploy("app", parts[2])
                 return "Usage: /cloud [status|connect <provider>|deploy <path>]"
 
+            # ================================================================
+            # MISSION CONTROL & TOOLS
+            # ================================================================
+
+            if cmd == "dashboard" or cmd == "mission-control":
+                try:
+                    import subprocess
+                    import sys
+                    import os
+                    
+                    # Get absolute path to dashboard script
+                    current_dir = os.path.dirname(os.path.abspath(__file__))
+                    dashboard_script = os.path.join(current_dir, "dashboard_tui.py")
+                    
+                    subprocess.Popen([sys.executable, dashboard_script], shell=True)
+                    return "✅ Mission Control Dashboard launched in separate window!"
+                except Exception as e:
+                    return f"❌ Failed to launch dashboard: {e}"
+
+            if cmd.startswith("web "):
+                if not self.web_agent:
+                    return "❌ Web Agent not available"
+                parts = command.split(maxsplit=2)
+                if len(parts) < 2: return "Usage: /web [visit <url>|research <topic>]"
+                action = parts[1]
+                if action == "visit" and len(parts) > 2:
+                    return self.web_agent.visit(parts[2])
+                if action == "research" and len(parts) > 2:
+                    return self.web_agent.research(parts[2])
+                return "Usage: /web [visit <url>|research <topic>]"
+
+            if cmd.startswith("docker "):
+                if not self.docker_manager:
+                    return "❌ Docker Manager not available"
+                parts = command.split(maxsplit=2)
+                if len(parts) < 2: return "Usage: /docker [info|list|config <type>|start <id>|stop <id>]"
+                action = parts[1]
+                if action == "info":
+                    return self.docker_manager.get_info()
+                if action == "list":
+                    containers = self.docker_manager.list_containers()
+                    return f"🐳 Containers:\n{containers}"
+                if action == "config" and len(parts) > 2:
+                    return self.docker_manager.generate_config(parts[2])
+                if action == "start" and len(parts) > 2:
+                    return self.docker_manager.start_container(parts[2])
+                if action == "stop" and len(parts) > 2:
+                    return self.docker_manager.stop_container(parts[2])
+                return "Usage: /docker [info|list|config <type>]"
+
+            if cmd.startswith("persona"):
+                if not self.persona_manager:
+                     return "❌ Persona Manager not available"
+                parts = command.split()
+                if len(parts) == 1 or parts[1] == "list":
+                    return self.persona_manager.list_personas()
+                if parts[1] == "switch" and len(parts) > 2:
+                    return self.persona_manager.set_persona(parts[2])
+                if parts[1] == "active":
+                    return f"🎭 Current persona: {self.persona_manager.current_persona or 'Default'}"
+                return "Usage: /persona [list|switch <name>|active]"
+
             # --- Blockchain ---
             if cmd.startswith("web3 "):
                 if not self.blockchain:
@@ -5034,7 +5113,7 @@ ANSWER:"""
 def run_cli_mode() -> int:
     """Run in headless CLI mode for VS Code extension."""
     try:
-        nexus = NexusAI(quiet=True)
+        aether = AetherAI(quiet=True)
         while True:
             try:
                 line = sys.stdin.readline()
@@ -5043,7 +5122,7 @@ def run_cli_mode() -> int:
                 line = line.strip()
                 if not line:
                     continue
-                response = nexus.process_input(line)
+                response = aether.process_input(line)
                 print(response)
                 sys.stdout.flush()
             except KeyboardInterrupt:
@@ -5064,7 +5143,7 @@ def run_interactive_mode() -> int:
         from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
         from prompt_toolkit.styles import Style
         
-        nexus = NexusAI()
+        aether = AetherAI()
         
         # Setup history
         history_file = os.path.join(os.path.expanduser("~"), ".nexus", "history.txt")
@@ -5082,7 +5161,7 @@ def run_interactive_mode() -> int:
         while True:
             try:
                 user_input = session.prompt(
-                    [('class:prompt', f"[{nexus.current_model.upper()}] > ")],
+                    [('class:prompt', f"[{aether.current_model.upper()}] > ")],
                     style=style
                 )
                 
@@ -5093,7 +5172,7 @@ def run_interactive_mode() -> int:
                     console.print("[yellow]Goodbye![/yellow]")
                     break
                 
-                response = nexus.process_input(user_input)
+                response = aether.process_input(user_input)
                 console.print(response)
                 
             except KeyboardInterrupt:

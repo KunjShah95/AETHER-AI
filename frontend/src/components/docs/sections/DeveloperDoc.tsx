@@ -46,11 +46,11 @@ const DeveloperDoc = () => {
                         <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                             Developer Guide
                         </h1>
-                        <p className="text-slate-400">Contribute to NEXUS AI</p>
+                        <p className="text-slate-400">Contribute to AETHER AI</p>
                     </div>
                 </div>
                 <p className="text-lg text-slate-300">
-                    We welcome contributions to NEXUS AI! This guide will help you set up your development environment and understand the project structure.
+                    We welcome contributions to AETHER AI! This guide will help you set up your development environment and understand the project structure.
                 </p>
             </motion.div>
 
@@ -222,8 +222,8 @@ source venv/bin/activate`} />
                                 animate={{ x: 0, opacity: 1 }}
                                 transition={{ delay: index * 0.05 + 1.0 }}
                                 className={`flex items-center gap-3 py-2 px-3 rounded-lg ${item.highlight
-                                        ? 'bg-purple-500/10 border border-purple-500/30'
-                                        : 'hover:bg-slate-800/50'
+                                    ? 'bg-purple-500/10 border border-purple-500/30'
+                                    : 'hover:bg-slate-800/50'
                                     }`}
                             >
                                 <code className="text-purple-400">{item.path}</code>

@@ -925,4 +925,3 @@ class WorkflowEngine:
         
         lines.append("\n💡 Run any template to create it as a workflow")
         return "\n".join(lines)
-

@@ -15,6 +15,17 @@ const AdvancedDoc = () => {
             ]
         },
         {
+            title: 'Autonomous Agents',
+            icon: Brain,
+            color: 'from-pink-500 to-rose-500',
+            commands: [
+                { cmd: '/persona [name]', desc: 'Switch expert persona (security, qa)' },
+                { cmd: '/web [url]', desc: 'Autonomous web agent research' },
+                { cmd: '/docker init', desc: 'Auto-generate Docker environment' },
+                { cmd: '/autopilot [goal]', desc: 'Autonomous workflow execution' },
+            ]
+        },
+        {
             title: 'Analytics & Monitoring',
             icon: BarChart3,
             color: 'from-blue-500 to-cyan-500',
@@ -75,7 +86,7 @@ const AdvancedDoc = () => {
                     Advanced Features
                 </h1>
                 <p className="text-lg text-slate-300">
-                    Unlock the full power of NEXUS AI with advanced features for productivity, creativity, and development.
+                    Unlock the full power of AETHER AI with advanced features for productivity, creativity, and development.
                 </p>
             </motion.div>
 

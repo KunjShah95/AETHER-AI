@@ -1,6 +1,6 @@
 # AI Models
 
-NEXUS AI supports a wide range of AI models, allowing you to choose the best tool for the job.
+AETHER AI supports a wide range of AI models, allowing you to choose the best tool for the job.
 
 ## Supported Models
 
@@ -45,7 +45,7 @@ Ollama allows you to run large language models locally.
 
 1. **Install Ollama**: Download from [ollama.ai](https://ollama.ai).
 2. **Pull Models**: Run `ollama pull [model_name]` in your terminal (e.g., `ollama pull llama3`).
-3. **Use in NEXUS**:
+3. **Use in AETHER**:
     * List models: `/ollama-models`
     * View specs: `/ollama-models [name]`
     * Switch: `/switch ollama [name]`

@@ -1,8 +1,8 @@
 {
-  "name": "nexus-ai-terminal-extension",
-  "displayName": "Nexus AI Terminal Assistant",
-  "description": "Surface the Nexus AI terminal assistant inside VS Code with quick models, utilities, and contextual controls.",
-  "version": "0.1.0",
+  "name": "aether-ai-terminal-extension",
+  "displayName": "Aether AI Terminal Assistant",
+  "description": "Surface the Aether AI terminal assistant inside VS Code with quick models, utilities, and contextual controls.",
+  "version": "2.0.0",
   "publisher": "kunjshah95",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -22,6 +22,7 @@
     "ai",
     "assistant",
     "terminal",
+    "aether",
     "nexus",
     "gpt",
     "chatgpt",
@@ -52,40 +53,45 @@
   "contributes": {
     "commands": [
       {
-        "command": "nexusAi.startAssistant",
-        "title": "Nexus AI: Start Assistant",
-        "category": "Nexus AI"
+        "command": "aetherAi.startAssistant",
+        "title": "Aether AI: Start Assistant",
+        "category": "Aether AI"
       },
       {
-        "command": "nexusAi.stopAssistant",
-        "title": "Nexus AI: Stop Assistant",
-        "category": "Nexus AI"
+        "command": "aetherAi.stopAssistant",
+        "title": "Aether AI: Stop Assistant",
+        "category": "Aether AI"
       },
       {
-        "command": "nexusAi.sendQuickCommand",
-        "title": "Nexus AI: Run Quick Command",
-        "category": "Nexus AI"
+        "command": "aetherAi.sendQuickCommand",
+        "title": "Aether AI: Run Quick Command",
+        "category": "Aether AI"
       },
       {
-        "command": "nexusAi.openAssistantPanel",
-        "title": "Nexus AI: Open Assistant Panel",
-        "category": "Nexus AI"
+        "command": "aetherAi.openAssistantPanel",
+        "title": "Aether AI: Open Assistant Panel",
+        "category": "Aether AI"
+      },
+      {
+        "command": "aetherAi.insertTimestamp",
+        "title": "Insert Timestamp",
+        "category": "Aether AI"
       }
     ],
     "configuration": {
-      "title": "Nexus AI Terminal Assistant",
+      "title": "Aether AI Terminal Assistant",
       "properties": {
-        "nexusAiAssistant.pythonPath": {
+        "aetherAiAssistant.pythonPath": {
           "type": "string",
           "default": "python",
           "description": "Path to the Python interpreter used to launch the terminal assistant."
         },
-        "nexusAiAssistant.preferredModel": {
+        "aetherAiAssistant.preferredModel": {
           "type": "string",
           "default": "gpt-5.1-codex-mini",
           "description": "Preferred model that the assistant should advertise when multiple backends are available."
         },
-        "nexusAiAssistant.autoStart": {
+        "aetherAiAssistant.autoStart": {
           "type": "boolean",
           "default": false,
           "description": "Automatically start the assistant when the workspace opens."

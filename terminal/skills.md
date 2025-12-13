@@ -1,15 +1,15 @@
 # AetherAI Skills & Capabilities
 
-This document defines the skills, capabilities, and behavioral guidelines for AetherAI terminal assistant. 
+This document defines the skills, capabilities, and behavioral guidelines for AetherAI terminal assistant.
 It follows the skills.md pattern introduced by Anthropic for AI assistants.
 
 ---
 
 ## Core Identity
 
-**Name:** AetherAI (Nexus AI Terminal Assistant)  
-**Version:** 1.1.0  
-**Type:** Terminal-based AI Assistant with Multi-Model Support  
+**Name:** AetherAI (formerly Nexus AI)
+**Version:** 2.0.0
+**Type:** Agentic AI Terminal Assistant with Multi-Model Support
 **Author:** Kunj Shah
 
 ---
@@ -66,6 +66,72 @@ Interactive Ollama: /switch ollama (pick by number)
 - Project-aware context detection
 - Smart context window management
 
+#### 🚀 AutoPilot (Agentic Tasks)
+```
+/autopilot <task>  - Execute complex multi-step tasks autonomously
+/agent task <task> - Alias for autopilot
+```
+**Behavior:**
+- Breaks down tasks into sub-steps
+- Executes code, reads files, and navigates autonomously
+- Reports progress at each step
+
+---
+
+### 🚀 Mission Control & Management
+
+#### 🖥️ Dashboard (TUI)
+```
+/dashboard         - Launch full-screen command center
+/mission-control   - Alias for dashboard
+```
+**Features:**
+- System resource monitoring (CPU, RAM)
+- Real-time activity logs
+- Active task tracking
+
+#### 🎭 Persona Management
+```
+/persona list      - List available personas
+/persona switch    - Switch active persona
+/persona active    - Show current persona
+```
+**Behavior:**
+- Updates system prompts and behavioral guidelines based on persona (e.g., "Senior Engineer", "Data Scientist", "Security Auditor").
+
+#### 🐳 Docker Management
+```
+/docker list       - List containers
+/docker info       - Docker system info
+/docker start <id> - Start container
+/docker stop <id>  - Stop container
+/docker config     - Generate Docker configs
+```
+
+---
+
+### 🌐 Advanced Web Capabilities
+
+#### Web Agent
+```
+/web visit <url>   - Visit a webpage and extract content
+/web research <t>  - Deep research on a topic
+```
+
+#### Web Search
+```
+/search <query>    - Search the web (DuckDuckGo)
+/docs <topic>      - Search documentation
+/fetch <url>       - Fetch and read URL content
+/read <url>        - Read URL (alias)
+```
+
+**Behavior:**
+- Prioritize documentation from official sources
+- Cache fetched pages to reduce requests
+- Convert HTML to clean text
+- Extract main content, skip navigation/ads
+
 ---
 
 ### 📁 File Operations
@@ -114,11 +180,6 @@ Interactive Ollama: /switch ollama (pick by number)
 /explain-error     - Debug errors
 ```
 
-**Behavior:**
-- Consider code quality, security, performance
-- Provide actionable suggestions
-- Reference best practices
-
 #### Productivity
 ```
 /clip              - Copy last response to clipboard
@@ -152,24 +213,6 @@ Interactive Ollama: /switch ollama (pick by number)
 - Requires: `pip install pyttsx3`
 - Automatic for AI responses when enabled
 - Truncates long responses
-
----
-
-### 🌐 Web Capabilities
-
-#### Web Search
-```
-/search <query>    - Search the web (DuckDuckGo)
-/docs <topic>      - Search documentation
-/fetch <url>       - Fetch and read URL content
-/read <url>        - Read URL (alias)
-```
-
-**Behavior:**
-- Prioritize documentation from official sources
-- Cache fetched pages to reduce requests
-- Convert HTML to clean text
-- Extract main content, skip navigation/ads
 
 ---
 

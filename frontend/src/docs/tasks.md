@@ -1,6 +1,6 @@
 # Task Management System
 
-NEXUS AI includes a built-in task management system to help you stay organized directly from the terminal.
+AETHER AI includes a built-in task management system to help you stay organized directly from the terminal.
 
 ## Basic Operations
 

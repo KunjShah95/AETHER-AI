@@ -57,7 +57,7 @@ const SecurityDoc = () => {
                     </div>
                 </div>
                 <p className="text-lg text-slate-300">
-                    NEXUS AI is designed with security as a core priority from the ground up.
+                    AETHER AI is designed with security as a core priority from the ground up.
                 </p>
             </motion.div>
 

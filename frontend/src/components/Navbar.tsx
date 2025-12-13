@@ -20,9 +20,9 @@ export const Navbar = () => {
                 {/* Logo */}
                 <div className="flex items-center gap-2 px-4">
                     <div className="h-6 w-6 bg-terminal-cyan rounded-lg flex items-center justify-center">
-                        <span className="text-black font-bold text-xs">N</span>
+                        <span className="text-black font-bold text-xs">A</span>
                     </div>
-                    <span className="text-white font-bold text-sm tracking-wide">NEXUS AI</span>
+                    <span className="text-white font-bold text-sm tracking-wide">AETHER AI</span>
                 </div>
 
                 {/* Desktop Menu */}

@@ -23,8 +23,8 @@ const HomeDoc = () => {
         },
         {
             icon: Globe,
-            title: 'Powerful Utilities',
-            description: 'Web search, system info, notes, timers, and conversions',
+            title: 'Autonomous Agents',
+            description: 'Multi-agent system with efficient Web Agent and specialized Personas',
             color: 'from-purple-500 to-pink-500'
         },
         {
@@ -35,8 +35,8 @@ const HomeDoc = () => {
         },
         {
             icon: CheckSquare,
-            title: 'Productivity Suite',
-            description: 'Task manager, themes, reminders, analytics, and learning tools',
+            title: 'Mission Control',
+            description: 'AutoPilot workflows, TUI Dashboard, and real-time monitoring',
             color: 'from-indigo-500 to-violet-500'
         },
     ];
@@ -52,12 +52,12 @@ const HomeDoc = () => {
                 <div className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-full px-6 py-2">
                     <Terminal className="w-5 h-5 text-purple-400" />
                     <span className="text-sm font-medium bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                        Version 3.0.1
+                        Version 4.0.0
                     </span>
                 </div>
 
                 <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                    NEXUS AI Terminal Assistant
+                    AETHER AI Terminal Assistant
                 </h1>
 
                 <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">

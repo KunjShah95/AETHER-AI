@@ -49,7 +49,7 @@ export function Hero() {
                     <div className="mt-8 flex items-center justify-center md:justify-start gap-4 text-sm text-neutral-500">
                         <div className="flex items-center gap-1">
                             <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                            <span>v1.0.0 Stable</span>
+                            <span>v4.0.0 Stable</span>
                         </div>
                         <div className="flex items-center gap-1">
                             <div className="w-2 h-2 rounded-full bg-blue-500"></div>
@@ -64,7 +64,7 @@ export function Hero() {
                         <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                         <img
                             src="/nexus_ai_dashboard.svg"
-                            alt="NEXUS-AI Dashboard - Interactive Terminal with Neural Network Visualization"
+                            alt="AETHER-AI Dashboard - Interactive Terminal with Neural Network Visualization"
                             className="w-full h-auto object-cover transform transition-transform duration-700 hover:scale-105"
                         />
                         {/* Overlay for better text contrast if needed, or just aesthetic sheen */}

@@ -1,6 +1,6 @@
 # Security
 
-NEXUS AI is designed with security as a core priority.
+AETHER AI is designed with security as a core priority.
 
 ## Security Model
 

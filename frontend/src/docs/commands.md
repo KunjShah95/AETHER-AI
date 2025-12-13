@@ -7,7 +7,7 @@
 | `/help` | Show comprehensive help menu |
 | `/status` | Display current model and system status |
 | `/clear` | Clear the terminal screen |
-| `/exit` | Exit the NEXUS AI terminal |
+| `/exit` | Exit the AETHER AI terminal |
 | `/sysinfo` | Show detailed system information |
 | `/config` | Display current configuration |
 
@@ -53,3 +53,20 @@
 | `/git delete-branch [name]` | Delete a branch |
 | `/aifind [keyword]` | AI-powered file search |
 | `/explore` | Explore codebase |
+
+## Advanced AI Features
+
+| Command | Description |
+|---------|-------------|
+| `/persona [name]` | Switch to a specialized AI persona (e.g., 'security', 'qa') |
+| `/personas` | List available AI personas |
+| `/web [url]` | Instruct the Web Agent to visit and analyze a URL |
+| `/research [topic]` | Perform deep web research on a topic |
+| `/docker init` | Generate Dockerfile and compose for the current project |
+| `/docker up` | Start the dev environment |
+| `/vision [path]` | Analyze an image using the vision model |
+| `/voice` | Toggle conversational voice mode |
+| `/dashboard` | Launch the TUI Mission Control dashboard |
+| `/autopilot [goal]` | Start an autonomous workflow to achieve a goal |
+| `/workflow list` | List available workflows |
+
