@@ -2,12 +2,12 @@ Metadata-Version: 2.4
 Name: aetherai
 Version: 1.0.0
 Summary: AetherAI - Production-ready, secure, multi-model AI terminal assistant with RAG, voice, and developer tools
-Home-page: https://github.com/KunjShah95/NEXUS-AI.io
+Home-page: <https://github.com/KunjShah95/NEXUS-AI.io>
 Author: Kunj Shah
 Author-email: Kunj Shah <kunjshah.cloudcomputing@gmail.com>
 Maintainer-email: Kunj Shah <kunjshah.cloudcomputing@gmail.com>
 License: MIT License
-        
+
         Copyright (c) 2025 KUNJ SHAH
         
         Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,11 +28,11 @@ License: MIT License
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         SOFTWARE.
         
-Project-URL: Homepage, https://kunjshah95.github.io/NEXUS-AI.io/
-Project-URL: Documentation, https://kunjshah95.github.io/NEXUS-AI.io/docs
-Project-URL: Repository, https://github.com/KunjShah95/NEXUS-AI.io.git
-Project-URL: Issues, https://github.com/KunjShah95/NEXUS-AI.io/issues
-Project-URL: Changelog, https://github.com/KunjShah95/NEXUS-AI.io/blob/main/CHANGELOG.md
+Project-URL: Homepage, <https://kunjshah95.github.io/NEXUS-AI.io/>
+Project-URL: Documentation, <https://kunjshah95.github.io/NEXUS-AI.io/docs>
+Project-URL: Repository, <https://github.com/KunjShah95/NEXUS-AI.io.git>
+Project-URL: Issues, <https://github.com/KunjShah95/NEXUS-AI.io/issues>
+Project-URL: Changelog, <https://github.com/KunjShah95/NEXUS-AI.io/blob/main/CHANGELOG.md>
 Keywords: ai,terminal,assistant,llm,gemini,groq,ollama,openai,rag,voice,cli,developer-tools,code-review,productivity
 Classifier: Development Status :: 4 - Beta
 Classifier: Environment :: Console
@@ -141,6 +141,7 @@ Production‑ready, secure, multi‑model AI for your terminal. Switch between G
 ### 🚀 Quick Install (Recommended)
 
 ```bash
+
 # Using pip
 pip install aetherai
 
@@ -149,7 +150,9 @@ uv pip install aetherai
 ```
 
 After installation, run the assistant:
+
 ```bash
+
 aetherai
 # or
 nexus-ai
@@ -160,6 +163,7 @@ nexus-ai
 Choose the features you need:
 
 ```bash
+
 # Lightweight install (core only - ~100MB)
 pip install aetherai
 
@@ -211,6 +215,7 @@ python terminal/main.py
 Create and edit a `.env` file at the project root with the following variables:
 
 ```env
+
 GEMINI_API_KEY=...
 GROQ_API_KEY=...
 HUGGINGFACE_TOKEN=...

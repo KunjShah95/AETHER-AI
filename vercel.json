@@ -1,7 +1,10 @@
 {
-    "buildCommand": "cd frontend && npm install && npm run build",
+    "version": 2,
+    "buildCommand": "cd frontend && npm ci && npm run build",
     "outputDirectory": "frontend/dist",
     "framework": null,
+    "installCommand": "cd frontend && npm ci",
+    "devCommand": "cd frontend && npm run dev",
     "rewrites": [
         {
             "source": "/(.*)",
@@ -17,6 +20,29 @@
                     "value": "public, max-age=31536000, immutable"
                 }
             ]
+        },
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "X-Frame-Options",
+                    "value": "DENY"
+                },
+                {
+                    "key": "X-Content-Type-Options",
+                    "value": "nosniff"
+                },
+                {
+                    "key": "Referrer-Policy",
+                    "value": "strict-origin-when-cross-origin"
+                }
+            ]
+        }
+    ],
+    "redirects": [
+        {
+            "source": "/api/(.*)",
+            "destination": "/api/$1"
         }
     ]
 }
