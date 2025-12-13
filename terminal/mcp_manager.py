@@ -144,7 +144,7 @@ class MCPManager:
         """
         self.config_dir = config_dir or os.path.join(
             os.getenv('HOME') or os.getenv('USERPROFILE') or os.path.expanduser('~'),
-            '.nexus', 'mcp'
+            '.aether', 'mcp'
         )
         os.makedirs(self.config_dir, exist_ok=True)
         

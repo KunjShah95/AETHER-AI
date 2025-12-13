@@ -15,8 +15,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          # Build using the Dockerfile located in the terminal/ directory
-          docker build -t aetherai:ci -f terminal/Dockerfile terminal
+          # Build using the Dockerfile located in the terminal/ directory but with root context
+          docker build -t aetherai:ci -f terminal/Dockerfile .
 
       - name: Run smoke test (aetherai --help)
         run: |

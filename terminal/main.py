@@ -5146,7 +5146,7 @@ def run_interactive_mode() -> int:
         aether = AetherAI()
         
         # Setup history
-        history_file = os.path.join(os.path.expanduser("~"), ".nexus", "history.txt")
+        history_file = os.path.join(os.path.expanduser("~"), ".aether", "history.txt")
         os.makedirs(os.path.dirname(history_file), exist_ok=True)
         
         session = PromptSession(

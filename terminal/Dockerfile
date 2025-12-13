@@ -16,8 +16,8 @@ COPY . .
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Create .nexus directory for application data
-RUN mkdir -p /root/.nexus
+# Create .aether directory for application data
+RUN mkdir -p /root/.aether
 
 # Install the application
 RUN pip install -e .
