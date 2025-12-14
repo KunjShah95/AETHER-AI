@@ -8,9 +8,9 @@ from rich.console import Console
 console = Console()
 
 
-def register_api_commands(nexus_instance):
-    """Register API client commands with the NexusAI instance"""
-    api = nexus_instance.api_client
+def register_api_commands(aetherai_instance):
+    """Register API client commands with the AetherAI instance"""
+    api = aetherai_instance.api_client
     
     commands = {
         # HTTP Methods
@@ -26,9 +26,9 @@ def register_api_commands(nexus_instance):
         'http reset': lambda args: api.reset(),
         
         # Collections
-        'http save': lambda args: api.save_collection(args[0], nexus_instance._http_last_method, 
-                                                       nexus_instance._http_last_url,
-                                                       nexus_instance._http_last_data) if args else "Usage: /http save [name]",
+        'http save': lambda args: api.save_collection(args[0], aetherai_instance._http_last_method, 
+                                                       aetherai_instance._http_last_url,
+                                                       aetherai_instance._http_last_data) if args else "Usage: /http save [name]",
         'http collection list': lambda args: api.list_collections(),
         'http collection run': lambda args: api.run_collection(args[0]) if args else "Usage: /http collection run [name]",
         
@@ -44,9 +44,9 @@ def register_api_commands(nexus_instance):
     return commands
 
 
-def register_db_commands(nexus_instance):
-    """Register database commands with the NexusAI instance"""
-    db = nexus_instance.database_manager
+def register_db_commands(aetherai_instance):
+    """Register database commands with the AetherAI instance"""
+    db = aetherai_instance.database_manager
     
     commands = {
         # Connection Management
@@ -69,9 +69,9 @@ def register_db_commands(nexus_instance):
     return commands
 
 
-def register_pkg_commands(nexus_instance):
-    """Register package manager commands with the NexusAI instance"""
-    pkg = nexus_instance.package_manager
+def register_pkg_commands(aetherai_instance):
+    """Register package manager commands with the AetherAI instance"""
+    pkg = aetherai_instance.package_manager
     
     commands = {
         # Package Operations
@@ -92,9 +92,9 @@ def register_pkg_commands(nexus_instance):
     return commands
 
 
-def register_test_commands(nexus_instance):
-    """Register testing commands with the NexusAI instance"""
-    test = nexus_instance.test_runner
+def register_test_commands(aetherai_instance):
+    """Register testing commands with the AetherAI instance"""
+    test = aetherai_instance.test_runner
     
     commands = {
         # Test Execution
@@ -116,9 +116,9 @@ def register_test_commands(nexus_instance):
     return commands
 
 
-def register_watch_commands(nexus_instance):
-    """Register file watcher commands with the NexusAI instance"""
-    watch = nexus_instance.file_watcher
+def register_watch_commands(aetherai_instance):
+    """Register file watcher commands with the AetherAI instance"""
+    watch = aetherai_instance.file_watcher
     
     commands = {
         # Watch Management
@@ -146,25 +146,25 @@ def register_watch_commands(nexus_instance):
     return commands
 
 
-def get_all_high_priority_commands(nexus_instance):
+def get_all_high_priority_commands(aetherai_instance):
     """Get all high-priority command handlers"""
     all_commands = {}
     
     # Only register if modules are available
-    if nexus_instance.api_client:
-        all_commands.update(register_api_commands(nexus_instance))
+    if aetherai_instance.api_client:
+        all_commands.update(register_api_commands(aetherai_instance))
     
-    if nexus_instance.database_manager:
-        all_commands.update(register_db_commands(nexus_instance))
+    if aetherai_instance.database_manager:
+        all_commands.update(register_db_commands(aetherai_instance))
     
-    if nexus_instance.package_manager:
-        all_commands.update(register_pkg_commands(nexus_instance))
+    if aetherai_instance.package_manager:
+        all_commands.update(register_pkg_commands(aetherai_instance))
     
-    if nexus_instance.test_runner:
-        all_commands.update(register_test_commands(nexus_instance))
+    if aetherai_instance.test_runner:
+        all_commands.update(register_test_commands(aetherai_instance))
     
-    if nexus_instance.file_watcher:
-        all_commands.update(register_watch_commands(nexus_instance))
+    if aetherai_instance.file_watcher:
+        all_commands.update(register_watch_commands(aetherai_instance))
     
     return all_commands
 

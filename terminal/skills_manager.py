@@ -8,7 +8,7 @@ This module provides Claude-like skills and rules file support:
 
 These files can be placed in:
 - Project root (./SKILLS.md, ./RULES.md)
-- Home directory (~/.nexus/SKILLS.md, ~/.nexus/RULES.md)
+- Home directory (~/.aetherai/SKILLS.md, ~/.aetherai/RULES.md)
 - Terminal directory (terminal/skills.md)
 """
 
@@ -64,7 +64,7 @@ class SkillsManager:
         self.home_dir = Path(
             os.getenv('HOME') or os.getenv('USERPROFILE') or os.path.expanduser('~')
         )
-        self.nexus_dir = self.home_dir / '.nexus'
+        self.aetherai_dir = self.home_dir / '.aetherai'
         
         self.skills: Dict[str, Skill] = {}
         self.rules: List[Rule] = []
@@ -87,7 +87,7 @@ class SkillsManager:
         """
         search_dirs = search_dirs or [
             self.project_dir,
-            self.nexus_dir,
+            self.aetherai_dir,
             Path(__file__).parent  # terminal directory
         ]
         

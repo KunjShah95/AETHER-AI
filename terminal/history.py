@@ -6,7 +6,7 @@ from typing import List, Dict, Any
 class HistoryManager:
     def __init__(self, base_dir: str = None):
         if base_dir is None:
-            base_dir = os.path.join(os.path.expanduser("~"), ".nexus", "history")
+            base_dir = os.path.join(os.path.expanduser("~"), ".aetherai", "history")
         self.base_dir = base_dir
         os.makedirs(self.base_dir, exist_ok=True)
 

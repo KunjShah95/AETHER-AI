@@ -1,6 +1,6 @@
 """
-Database Manager - Universal database connection and management tool
-Supports SQLite, PostgreSQL, MySQL, and MongoDB
+Database Manager - SQLite database connection and management tool
+Supports SQLite database operations
 """
 
 import os
@@ -16,7 +16,7 @@ console = Console()
 
 
 class DatabaseManager:
-    """Universal database manager for multiple database types"""
+    """SQLite database manager"""
     
     def __init__(self):
         self.connections = {}
@@ -27,7 +27,7 @@ class DatabaseManager:
     def _load_connections(self):
         """Load saved database connections"""
         try:
-            conn_path = os.path.join(os.path.expanduser("~"), ".nexus", "db_connections.json")
+            conn_path = os.path.join(os.path.expanduser("~"), ".aetherai", "db_connections.json")
             if os.path.exists(conn_path):
                 with open(conn_path, 'r') as f:
                     saved = json.load(f)
@@ -39,7 +39,7 @@ class DatabaseManager:
     def _save_connections(self):
         """Save connection configurations"""
         try:
-            conn_path = os.path.join(os.path.expanduser("~"), ".nexus", "db_connections.json")
+            conn_path = os.path.join(os.path.expanduser("~"), ".aetherai", "db_connections.json")
             os.makedirs(os.path.dirname(conn_path), exist_ok=True)
             with open(conn_path, 'w') as f:
                 json.dump(self.connections, f, indent=2)
@@ -53,14 +53,8 @@ class DatabaseManager:
             
             if db_type == "sqlite":
                 return self._connect_sqlite(connection_string, name)
-            elif db_type == "postgresql" or db_type == "postgres":
-                return self._connect_postgresql(connection_string, name)
-            elif db_type == "mysql":
-                return self._connect_mysql(connection_string, name)
-            elif db_type == "mongodb" or db_type == "mongo":
-                return self._connect_mongodb(connection_string, name)
             else:
-                return f"❌ Unsupported database type: {db_type}\n   Supported: sqlite, postgresql, mysql, mongodb"
+                return f"❌ Unsupported database type: {db_type}\n   Supported: sqlite"
         
         except Exception as e:
             return f"❌ Connection error: {str(e)}"
@@ -82,66 +76,6 @@ class DatabaseManager:
             return f"✅ Connected to SQLite database: {path}\n   Connection name: {name}"
         except Exception as e:
             return f"❌ SQLite connection failed: {str(e)}"
-    
-    def _connect_postgresql(self, connection_string: str, name: str) -> str:
-        """Connect to PostgreSQL database"""
-        try:
-            import psycopg2
-            conn = psycopg2.connect(connection_string)
-            self.connections[name] = {
-                "type": "postgresql",
-                "connection_string": connection_string,
-                "connection": conn,
-                "connected_at": datetime.now().isoformat()
-            }
-            self.active_connection = name
-            self.connection_type = "postgresql"
-            return f"✅ Connected to PostgreSQL database\n   Connection name: {name}"
-        except ImportError:
-            return "❌ psycopg2 not installed. Run: pip install psycopg2-binary"
-        except Exception as e:
-            return f"❌ PostgreSQL connection failed: {str(e)}"
-    
-    def _connect_mysql(self, connection_string: str, name: str) -> str:
-        """Connect to MySQL database"""
-        try:
-            import mysql.connector
-            # Parse connection string or use as host
-            conn = mysql.connector.connect(connection_string)
-            self.connections[name] = {
-                "type": "mysql",
-                "connection_string": connection_string,
-                "connection": conn,
-                "connected_at": datetime.now().isoformat()
-            }
-            self.active_connection = name
-            self.connection_type = "mysql"
-            return f"✅ Connected to MySQL database\n   Connection name: {name}"
-        except ImportError:
-            return "❌ mysql-connector-python not installed. Run: pip install mysql-connector-python"
-        except Exception as e:
-            return f"❌ MySQL connection failed: {str(e)}"
-    
-    def _connect_mongodb(self, connection_string: str, name: str) -> str:
-        """Connect to MongoDB database"""
-        try:
-            from pymongo import MongoClient
-            client = MongoClient(connection_string)
-            # Test connection
-            client.server_info()
-            self.connections[name] = {
-                "type": "mongodb",
-                "connection_string": connection_string,
-                "connection": client,
-                "connected_at": datetime.now().isoformat()
-            }
-            self.active_connection = name
-            self.connection_type = "mongodb"
-            return f"✅ Connected to MongoDB\n   Connection name: {name}"
-        except ImportError:
-            return "❌ pymongo not installed. Run: pip install pymongo"
-        except Exception as e:
-            return f"❌ MongoDB connection failed: {str(e)}"
     
     def list_connections(self) -> str:
         """List all database connections"""
@@ -176,9 +110,6 @@ class DatabaseManager:
             conn_info = self.connections[self.active_connection]
             conn = conn_info['connection']
             db_type = conn_info['type']
-            
-            if db_type == "mongodb":
-                return "❌ Use MongoDB-specific commands for NoSQL queries"
             
             cursor = conn.cursor()
             cursor.execute(sql)
@@ -220,18 +151,7 @@ class DatabaseManager:
             return "❌ No active database connection"
         
         try:
-            conn_info = self.connections[self.active_connection]
-            db_type = conn_info['type']
-            
-            if db_type == "sqlite":
-                query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-            elif db_type == "postgresql":
-                query = "SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename"
-            elif db_type == "mysql":
-                query = "SHOW TABLES"
-            else:
-                return "❌ Table listing not supported for this database type"
-            
+            query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
             return self.query(query)
         
         except Exception as e:
@@ -243,18 +163,7 @@ class DatabaseManager:
             return "❌ No active database connection"
         
         try:
-            conn_info = self.connections[self.active_connection]
-            db_type = conn_info['type']
-            
-            if db_type == "sqlite":
-                query = f"PRAGMA table_info({table_name})"
-            elif db_type == "postgresql":
-                query = f"SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name='{table_name}'"
-            elif db_type == "mysql":
-                query = f"DESCRIBE {table_name}"
-            else:
-                return "❌ Schema description not supported for this database type"
-            
+            query = f"PRAGMA table_info({table_name})"
             return self.query(query)
         
         except Exception as e:
@@ -267,16 +176,11 @@ class DatabaseManager:
         
         try:
             conn_info = self.connections[self.active_connection]
-            db_type = conn_info['type']
-            
-            if db_type == "sqlite":
-                import shutil
-                source = conn_info['path']
-                shutil.copy2(source, output_path)
-                size = os.path.getsize(output_path)
-                return f"✅ Database backup created\n   File: {output_path}\n   Size: {size:,} bytes"
-            else:
-                return "❌ Backup currently only supported for SQLite\n   Use native database tools for PostgreSQL/MySQL"
+            import shutil
+            source = conn_info['path']
+            shutil.copy2(source, output_path)
+            size = os.path.getsize(output_path)
+            return f"✅ Database backup created\n   File: {output_path}\n   Size: {size:,} bytes"
         
         except Exception as e:
             return f"❌ Backup error: {str(e)}"
@@ -288,24 +192,21 @@ class DatabaseManager:
         
         try:
             conn_info = self.connections[self.active_connection]
-            db_type = conn_info['type']
-            
             stats = []
             stats.append(f"🗄️ Database Statistics")
-            stats.append(f"Type: {db_type}")
+            stats.append(f"Type: sqlite")
             stats.append(f"Connection: {self.active_connection}")
             
-            if db_type == "sqlite":
-                path = conn_info['path']
-                size = os.path.getsize(path) if os.path.exists(path) else 0
-                stats.append(f"Size: {size:,} bytes ({size/1024/1024:.2f} MB)")
-                
-                # Count tables
-                conn = conn_info['connection']
-                cursor = conn.cursor()
-                cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table'")
-                table_count = cursor.fetchone()[0]
-                stats.append(f"Tables: {table_count}")
+            path = conn_info['path']
+            size = os.path.getsize(path) if os.path.exists(path) else 0
+            stats.append(f"Size: {size:,} bytes ({size/1024/1024:.2f} MB)")
+            
+            # Count tables
+            conn = conn_info['connection']
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table'")
+            table_count = cursor.fetchone()[0]
+            stats.append(f"Tables: {table_count}")
             
             return "\n".join(stats)
         
@@ -328,7 +229,7 @@ class DatabaseManager:
             conn = conn_info['connection']
             
             cursor = conn.cursor()
-            cursor.executescript(script) if self.connection_type == "sqlite" else cursor.execute(script)
+            cursor.executescript(script)
             conn.commit()
             
             return f"✅ Script executed successfully\n   File: {script_path}"

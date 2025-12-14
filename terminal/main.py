@@ -282,11 +282,11 @@ def _get_home_dir() -> str:
 
 
 def CONFIG_PATH() -> str:
-    return os.path.join(_get_home_dir(), '.nexus', 'config.yaml')
+    return os.path.join(_get_home_dir(), '.aetherai', 'config.yaml')
 
 
 def USER_DB_PATH() -> str:
-    return os.path.join(_get_home_dir(), '.nexus', 'users.json')
+    return os.path.join(_get_home_dir(), '.aetherai', 'users.json')
 MAX_RETRIES = 3
 RATE_LIMIT_DELAY = 1.5
 VERSION = "1.0.0"
@@ -2693,7 +2693,7 @@ class AetherAI:
             if cmd.startswith("note "):
                 try:
                     note = command.split(" ", 1)[1]
-                    notes_path = os.path.join(_get_home_dir(), '.nexus', 'notes.txt')
+                    notes_path = os.path.join(_get_home_dir(), '.aetherai', 'notes.txt')
                     os.makedirs(os.path.dirname(notes_path), exist_ok=True)
                     with open(notes_path, 'a', encoding='utf-8') as f:
                         f.write(note + "\n")
@@ -5259,4 +5259,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

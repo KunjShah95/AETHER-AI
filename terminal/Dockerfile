@@ -28,17 +28,17 @@ RUN groupadd -r aetherai && useradd -r -g aetherai aetherai
 # Set work directory
 WORKDIR /app
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+# Copy package configuration files first for better caching
+COPY setup.cfg pyproject.toml MANIFEST.in ./
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install the package to make console scripts available
+RUN pip install --no-cache-dir -e .
 
 # Copy application code
-COPY . .
+COPY terminal/ ./terminal/
 
 # Create necessary directories
-RUN mkdir -p /app/logs /app/data /app/.nexus && \
+RUN mkdir -p /app/logs /app/data /app/.aetherai && \
     chown -R aetherai:aetherai /app
 
 # Switch to non-root user
@@ -51,5 +51,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import requests; requests.get('http://localhost:8000/health', timeout=5)" || exit 1
 
-# Default command - run the main application
-CMD ["python", "main.py", "--cli"]
+# Default command - use the installed console script
+CMD ["aetherai"]

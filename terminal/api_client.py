@@ -33,7 +33,7 @@ class APIClient:
     def _load_collections(self):
         """Load saved request collections"""
         try:
-            collections_path = os.path.join(os.path.expanduser("~"), ".nexus", "api_collections.json")
+            collections_path = os.path.join(os.path.expanduser("~"), ".aetherai", "api_collections.json")
             if os.path.exists(collections_path):
                 with open(collections_path, 'r') as f:
                     self.collections = json.load(f)
@@ -43,7 +43,7 @@ class APIClient:
     def _save_collections(self):
         """Save request collections to disk"""
         try:
-            collections_path = os.path.join(os.path.expanduser("~"), ".nexus", "api_collections.json")
+            collections_path = os.path.join(os.path.expanduser("~"), ".aetherai", "api_collections.json")
             os.makedirs(os.path.dirname(collections_path), exist_ok=True)
             with open(collections_path, 'w') as f:
                 json.dump(self.collections, f, indent=2)

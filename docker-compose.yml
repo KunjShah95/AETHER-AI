@@ -18,8 +18,8 @@ services:
   # Backend Service
   backend:
     build:
-      context: ./terminal
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: terminal/Dockerfile
     container_name: aetherai-backend
     ports:
       - "8000:8000"
@@ -31,7 +31,7 @@ services:
       - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
       - MCP_API_KEY=${MCP_API_KEY}
     volumes:
-      - aetherai-data:/app/.nexus
+      - aetherai-data:/app/.aetherai
       - aetherai-logs:/app/logs
     restart: unless-stopped
     networks:
