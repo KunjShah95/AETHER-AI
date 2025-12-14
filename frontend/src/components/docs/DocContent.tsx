@@ -11,10 +11,9 @@ import DeveloperDoc from './sections/DeveloperDoc.tsx';
 
 interface DocContentProps {
     activeSection: string;
-    searchQuery: string;
 }
 
-const DocContent = ({ activeSection, searchQuery: _searchQuery }: DocContentProps) => {
+const DocContent = ({ activeSection }: DocContentProps) => {
     const renderSection = () => {
         switch (activeSection) {
             case 'home':

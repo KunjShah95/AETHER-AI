@@ -36,9 +36,9 @@ export function Terminal() {
                 }, 50 + Math.random() * 50);
                 return () => clearTimeout(timeout);
             } else {
-                // Finished typing command
-                setIsTyping(false);
+                // Finished typing command — proceed asynchronously
                 setTimeout(() => {
+                    setIsTyping(false);
                     setLines(prev => [...prev, { type: 'cmd', text: command.cmd }]);
                     setCurrentText('');
                     // Show output after a small delay

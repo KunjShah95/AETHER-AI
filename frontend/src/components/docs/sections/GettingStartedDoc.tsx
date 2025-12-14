@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Download, Code, Key, Play, CheckCircle, AlertCircle } from 'lucide-react';
+import { Download, Key, Play, CheckCircle, AlertCircle } from 'lucide-react';
 import CodeBlock from '../CodeBlock';
 
 const GettingStartedDoc = () => {

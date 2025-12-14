@@ -1,0 +1,48 @@
+/* Moving Border Component Styles */
+
+.moving-border-container {
+    border-radius: var(--border-radius, 1.75rem);
+}
+
+.moving-border-inner {
+    border-radius: calc(var(--border-radius, 1.75rem) * 0.96);
+}
+
+.moving-border-content {
+    border-radius: calc(var(--border-radius, 1.75rem) * 0.96);
+}
+
+.moving-border-animation {
+    transform: translateX(calc(var(--x, 0px))) translateY(calc(var(--y, 0px))) translateX(-50%) translateY(-50%);
+}
+
+/* Animation keyframes for smooth movement */
+@keyframes moving-border {
+    0% {
+        transform: translateX(-50%) translateY(-50%) translateX(0px) translateY(0px);
+    }
+    25% {
+        transform: translateX(-50%) translateY(-50%) translateX(10px) translateY(5px);
+    }
+    50% {
+        transform: translateX(-50%) translateY(-50%) translateX(5px) translateY(10px);
+    }
+    75% {
+        transform: translateX(-50%) translateY(-50%) translateX(-5px) translateY(5px);
+    }
+    100% {
+        transform: translateX(-50%) translateY(-50%) translateX(0px) translateY(0px);
+    }
+}
+
+/* Fallback for browsers that don't support CSS custom properties */
+@supports not (border-radius: calc(1rem * 0.96)) {
+    .moving-border-container {
+        border-radius: 1.75rem;
+    }
+    
+    .moving-border-inner,
+    .moving-border-content {
+        border-radius: 1.68rem;
+    }
+}

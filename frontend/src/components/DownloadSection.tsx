@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Download } from 'lucide-react';
 
 export function DownloadSection() {
-    const [downloadCount, setDownloadCount] = useState(0);
+    const [downloadCount, setDownloadCount] = useState<number>(() => {
+        const stored = typeof window !== 'undefined' ? localStorage.getItem('nexusDownloadCount') : null;
+        return stored ? parseInt(stored) : 0;
+    });
 
-    useEffect(() => {
-        const stored = localStorage.getItem('nexusDownloadCount');
-        if (stored) setDownloadCount(parseInt(stored));
-    }, []);
-
-    const handleDownload = (os: string) => {
+    const handleDownload = () => {
         const newCount = downloadCount + 1;
         setDownloadCount(newCount);
         localStorage.setItem('nexusDownloadCount', newCount.toString());
@@ -41,7 +39,7 @@ export function DownloadSection() {
                                 <a
                                     href={`/dist/install_${os.toLowerCase()}.zip`}
                                     download
-                                    onClick={() => handleDownload(os)}
+                                    onClick={handleDownload}
                                     className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700 transition-colors"
                                 >
                                     <Download className="w-4 h-4" />

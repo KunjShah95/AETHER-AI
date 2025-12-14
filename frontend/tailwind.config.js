@@ -43,6 +43,7 @@ export default {
                 border: "var(--border)",
                 input: "var(--input)",
                 ring: "var(--ring)",
+                'terminal-cyan': '#06b6d4',
             },
             animation: {
                 spotlight: "spotlight 2s ease .75s 1 forwards",

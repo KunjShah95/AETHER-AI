@@ -2,12 +2,12 @@ import React from "react";
 import {
     motion,
     useAnimationFrame,
-    useMotionTemplate,
     useMotionValue,
     useTransform,
 } from "framer-motion";
 import { useRef } from "react";
 import { cn } from "@/lib/utils";
+import "./MovingBorder.css";
 
 export function Button({
     borderRadius = "1.75rem",
@@ -21,27 +21,26 @@ export function Button({
 }: {
     borderRadius?: string;
     children: React.ReactNode;
-    as?: any;
+    as?: React.ElementType;
     containerClassName?: string;
     borderClassName?: string;
     duration?: number;
     className?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }) {
     return (
         <Component
             className={cn(
-                "bg-transparent relative text-xl  h-16 w-40 p-[1px] overflow-hidden ",
+                "bg-transparent relative text-xl  h-16 w-40 p-[1px] overflow-hidden moving-border-container",
                 containerClassName
             )}
             style={{
-                borderRadius: borderRadius,
+                "--border-radius": borderRadius,
             }}
             {...otherProps}
         >
             <div
-                className="absolute inset-0"
-                style={{ borderRadius: `calc(${borderRadius} * 0.96)` }}
+                className="absolute inset-0 moving-border-inner"
             >
                 <MovingBorder duration={duration} rx="30%" ry="30%">
                     <div
@@ -55,12 +54,9 @@ export function Button({
 
             <div
                 className={cn(
-                    "relative bg-slate-900/[0.8] border border-slate-800 backdrop-blur-xl text-white flex items-center justify-center w-full h-full text-sm antialiased",
+                    "relative bg-slate-900/[0.8] border border-slate-800 backdrop-blur-xl text-white flex items-center justify-center w-full h-full text-sm antialiased moving-border-content",
                     className
                 )}
-                style={{
-                    borderRadius: `calc(${borderRadius} * 0.96)`,
-                }}
             >
                 {children}
             </div>
@@ -79,7 +75,7 @@ export const MovingBorder = ({
     duration?: number;
     rx?: string;
     ry?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }) => {
     const pathRef = useRef<SVGRectElement>(null);
     const progress = useMotionValue<number>(0);
@@ -101,8 +97,6 @@ export const MovingBorder = ({
         (val) => pathRef.current?.getPointAtLength(val).y
     );
 
-    const transform = useMotionTemplate`translateX(${x}px) translateY(${y}px) translateX(-50%) translateY(-50%)`;
-
     return (
         <>
             <svg
@@ -123,13 +117,13 @@ export const MovingBorder = ({
                 />
             </svg>
             <motion.div
-                style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    display: "inline-block",
-                    transform,
-                }}
+                className="moving-border-animation"
+                style={
+                    {
+                        "--x": `${x.get()}px`,
+                        "--y": `${y.get()}px`,
+                    } as React.CSSProperties
+                }
             >
                 {children}
             </motion.div>

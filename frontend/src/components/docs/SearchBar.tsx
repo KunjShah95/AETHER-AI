@@ -34,10 +34,15 @@ const SearchBar = ({ searchQuery, setSearchQuery, onNavigate }: SearchBarProps) 
     // Open dropdown when typing
     useEffect(() => {
         if (searchQuery.length > 0) {
-            setIsOpen(true);
-            setSelectedIndex(0);
+            // Schedule open asynchronously to avoid sync setState in effect
+            const id = setTimeout(() => {
+                setIsOpen(true);
+                setSelectedIndex(0);
+            }, 0);
+            return () => clearTimeout(id);
         } else {
-            setIsOpen(false);
+            const id = setTimeout(() => setIsOpen(false), 0);
+            return () => clearTimeout(id);
         }
     }, [searchQuery]);
 
@@ -132,6 +137,9 @@ const SearchBar = ({ searchQuery, setSearchQuery, onNavigate }: SearchBarProps) 
                 />
                 {searchQuery && (
                     <button
+                        type="button"
+                        title="Clear search"
+                        aria-label="Clear search"
                         onClick={handleClear}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
                     >

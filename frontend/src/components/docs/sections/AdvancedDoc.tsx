@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Brain, Bell, BarChart3, Gamepad2, Palette, Users } from 'lucide-react';
+import { Brain, BarChart3, Gamepad2, Palette, Users } from 'lucide-react';
 
 const AdvancedDoc = () => {
     const features = [

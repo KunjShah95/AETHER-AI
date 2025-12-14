@@ -9,10 +9,8 @@ import {
     CheckSquare,
     Code,
     Rocket,
-    Search,
     Menu,
     X,
-    ChevronRight,
     Home
 } from 'lucide-react';
 import DocContent from '../components/docs/DocContent';
@@ -41,7 +39,7 @@ const Documentation = () => {
             {/* Animated Background */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-500/10 via-transparent to-transparent blur-3xl animate-pulse" />
-                <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-blue-500/10 via-transparent to-transparent blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+                <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-blue-500/10 via-transparent to-transparent blur-3xl animate-pulse delay-1000" />
             </div>
 
             {/* Header */}
@@ -102,7 +100,6 @@ const Documentation = () => {
                     >
                         <DocContent
                             activeSection={activeSection}
-                            searchQuery={searchQuery}
                         />
                     </motion.main>
                 </div>

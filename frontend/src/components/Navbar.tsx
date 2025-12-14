@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
 import { Menu, X, Github } from "lucide-react";
 
 export const Navbar = () => {
@@ -43,6 +42,7 @@ export const Navbar = () => {
                     <a
                         href="https://github.com/KunjShah95/NEXUS-AI.io"
                         target="_blank"
+                        rel="noopener noreferrer"
                         className="flex items-center gap-2 text-xs font-medium text-white bg-white/[0.1] hover:bg-white/[0.2] border border-white/[0.2] px-4 py-2 rounded-full transition-all"
                     >
                         <Github className="w-4 h-4" />
@@ -82,6 +82,7 @@ export const Navbar = () => {
                             <a
                                 href="https://github.com/KunjShah95/NEXUS-AI.io"
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 className="flex items-center justify-center gap-2 text-sm font-medium text-white bg-white/[0.1] p-3 rounded-xl"
                             >
                                 <Github className="w-4 h-4" />

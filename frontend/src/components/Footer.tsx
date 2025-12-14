@@ -1,5 +1,5 @@
 import React from 'react';
-import { Github, Twitter, Linkedin, Book } from 'lucide-react';
+import { Github, Twitter, Linkedin } from 'lucide-react';
 
 export function Footer() {
     return (
@@ -19,13 +19,13 @@ export function Footer() {
                 </div>
 
                 <div className="flex gap-6">
-                    <a href="https://twitter.com/INDIA_KUNJ" target="_blank" rel="noreferrer" className="text-neutral-400 hover:text-white transition-colors">
+                    <a href="https://twitter.com/INDIA_KUNJ" target="_blank" rel="noopener noreferrer" title="Follow us on Twitter" className="text-neutral-400 hover:text-white transition-colors">
                         <Twitter className="w-5 h-5" />
                     </a>
-                    <a href="https://www.linkedin.com/in/kunjshah05/" target="_blank" rel="noreferrer" className="text-neutral-400 hover:text-white transition-colors">
+                    <a href="https://www.linkedin.com/in/kunjshah05/" target="_blank" rel="noopener noreferrer" title="Connect on LinkedIn" className="text-neutral-400 hover:text-white transition-colors">
                         <Linkedin className="w-5 h-5" />
                     </a>
-                    <a href="https://github.com/KunjShah95" target="_blank" rel="noreferrer" className="text-neutral-400 hover:text-white transition-colors">
+                    <a href="https://github.com/KunjShah95" target="_blank" rel="noopener noreferrer" title="View our GitHub" className="text-neutral-400 hover:text-white transition-colors">
                         <Github className="w-5 h-5" />
                     </a>
                 </div>

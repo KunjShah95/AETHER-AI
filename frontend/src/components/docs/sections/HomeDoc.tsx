@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Terminal, Zap, Shield, Code, Palette, CheckSquare, Globe, Cpu } from 'lucide-react';
+import { Terminal, Zap, Shield, Code, CheckSquare, Globe, Cpu } from 'lucide-react';
 
 const HomeDoc = () => {
     const features = [

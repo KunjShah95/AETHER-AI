@@ -35,7 +35,7 @@ export const SparklesCore = (props: {
     }, []);
     const controls = useAnimation();
 
-    const particlesLoaded = async (container?: any) => {
+    const particlesLoaded = async (container?: unknown) => {
         if (container) {
             controls.start({
                 opacity: 1,
@@ -76,7 +76,7 @@ export const SparklesCore = (props: {
                                     enable: false,
                                     mode: "repulse",
                                 },
-                                resize: true as any,
+                                resize: {}, // allow particles to respond to resize events
                             },
                             modes: {
                                 push: {

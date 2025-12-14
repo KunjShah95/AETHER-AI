@@ -10,19 +10,28 @@ export const TextGenerateEffect = ({
     className?: string;
 }) => {
     const [scope, animate] = useAnimate();
-    let wordsArray = words.split(" ");
+    const wordsArray = words.split(" ");
     useEffect(() => {
-        animate(
-            "span",
-            {
-                opacity: 1,
-            },
-            {
-                duration: 2,
-                delay: stagger(0.2),
+        // Trigger animation after mount when DOM is available
+        const id = setTimeout(() => {
+            if (scope.current) {
+                animate(
+                    "span",
+                    {
+                        opacity: 1,
+                    },
+                    {
+                        duration: 2,
+                        delay: stagger(0.2),
+                    }
+                );
             }
-        );
-    }, [scope.current]);
+        }, 0);
+        return () => clearTimeout(id);
+    // We intentionally only depend on `animate` here; `scope` is a ref and
+    // including `scope` in the deps is unnecessary and noisy for this usage.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [animate]);
 
     const renderWords = () => {
         return (
