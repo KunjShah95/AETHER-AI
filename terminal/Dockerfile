@@ -31,11 +31,11 @@ WORKDIR /app
 # Copy package configuration files first for better caching
 COPY setup.cfg pyproject.toml MANIFEST.in ./
 
-# Install the package to make console scripts available
-RUN pip install --no-cache-dir -e .
-
 # Copy application code
 COPY terminal/ ./terminal/
+
+# Install the package to make console scripts available
+RUN pip install --no-cache-dir -e .
 
 # Create necessary directories
 RUN mkdir -p /app/logs /app/data /app/.aetherai && \
