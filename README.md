@@ -44,6 +44,7 @@ uv pip install aetherai
 ```
 
 After installation, run the assistant:
+
 ```bash
 aetherai
 # or

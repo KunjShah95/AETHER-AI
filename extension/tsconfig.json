@@ -10,6 +10,7 @@
     "sourceMap": true,
     "skipLibCheck": true,
     "moduleResolution": "node16",
+    "forceConsistentCasingInFileNames": true,
     "types": ["node", "vscode"]
   },
   "include": ["src"]

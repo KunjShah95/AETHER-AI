@@ -17,6 +17,7 @@ These rules take priority over general behavior.
 ⚠️ CRITICAL: Never expose API keys or secrets in code or responses
 ⚠️ CRITICAL: Always validate and sanitize user input before processing
 ⚠️ CRITICAL: Never execute arbitrary code without explicit user confirmation
+
 - Use parameterized queries for database operations
 - Sanitize file paths to prevent path traversal
 - Log security-relevant events

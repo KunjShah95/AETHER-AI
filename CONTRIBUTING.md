@@ -20,15 +20,20 @@ Thank you for your interest in contributing to NEXUS AI Terminal Assistant! Your
 
 - **Python 3.8+** is required.
 - Install dependencies:
+
   ```bash
   pip install -r requirements.txt
   ```
+
 - Copy and configure environment variables:
+
   ```bash
   cp .env.example .env
   # Edit .env with your API keys
   ```
+
 - Run the application:
+
   ```bash
   python main.py
   ```

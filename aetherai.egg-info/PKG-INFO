@@ -1,3 +1,5 @@
+# PKG-INFO
+
 Metadata-Version: 2.4
 Name: aetherai
 Version: 1.0.0
@@ -103,7 +105,7 @@ Provides-Extra: all
 Requires-Dist: aetherai[dev,rag,server,voice,web]; extra == "all"
 Dynamic: license-file
 
-# 🚀 NEXUS AI Terminal Assistant (AetherAI)
+## 🚀 NEXUS AI Terminal Assistant (AetherAI)
 
 [![PyPI version](https://img.shields.io/pypi/v/aetherai?color=blue&logo=python)](https://pypi.org/project/aetherai/)
 [![Python](https://img.shields.io/pypi/pyversions/aetherai)](https://pypi.org/project/aetherai/)
@@ -140,47 +142,38 @@ Production‑ready, secure, multi‑model AI for your terminal. Switch between G
 
 ### 🚀 Quick Install (Recommended)
 
-```bash
+    # Using pip
+    pip install aetherai
 
-# Using pip
-pip install aetherai
-
-# Using uv (faster!)
-uv pip install aetherai
-```
+    # Using uv (faster!)
+    uv pip install aetherai
 
 After installation, run the assistant:
 
-```bash
-
-aetherai
-# or
-nexus-ai
-```
+    aetherai
+    # or
+    nexus-ai
 
 ### 📦 Installation Extras
 
 Choose the features you need:
 
-```bash
+    # Lightweight install (core only - ~100MB)
+    pip install aetherai
 
-# Lightweight install (core only - ~100MB)
-pip install aetherai
+    # Full experience (voice, RAG, ML, server - like original)
+    pip install "aetherai[full]"
 
-# Full experience (voice, RAG, ML, server - like original)
-pip install "aetherai[full]"
+    # Specific features
+    pip install "aetherai[voice]"      # Voice input/output
+    pip install "aetherai[rag]"        # RAG knowledge base
+    pip install "aetherai[ml]"         # HuggingFace transformers
+    pip install "aetherai[server]"     # FastAPI web server
+    pip install "aetherai[db]"         # Database integrations
 
-# Specific features
-pip install "aetherai[voice]"      # Voice input/output
-pip install "aetherai[rag]"        # RAG knowledge base
-pip install "aetherai[ml]"         # HuggingFace transformers
-pip install "aetherai[server]"     # FastAPI web server
-pip install "aetherai[db]"         # Database integrations
-
-# Development
-pip install "aetherai[dev]"        # Testing & linting tools
-pip install "aetherai[all]"        # Everything including dev tools
-```
+    # Development
+    pip install "aetherai[dev]"        # Testing & linting tools
+    pip install "aetherai[all]"        # Everything including dev tools
 
 ### 🔧 Non-OS scripts (consolidated)
 
@@ -191,22 +184,20 @@ pip install "aetherai[all]"        # Everything including dev tools
 
 ### 🛠️ From source (for development)
 
-```bash
-# Clone
-git clone https://github.com/KunjShah95/NEXUS-AI.io.git
-cd NEXUS-AI.io
+    # Clone
+    git clone https://github.com/KunjShah95/NEXUS-AI.io.git
+    cd NEXUS-AI.io
 
-# Install in editable mode with dev dependencies
-pip install -e ".[dev]"
+    # Install in editable mode with dev dependencies
+    pip install -e ".[dev]"
 
-# Configure environment
-cp .env.example .env   # set your API keys; see below
+    # Configure environment
+    cp .env.example .env   # set your API keys; see below
 
-# Run
-aetherai
-# or directly
-python terminal/main.py
-```
+    # Run
+    aetherai
+    # or directly
+    python terminal/main.py
 
 ---
 
@@ -214,14 +205,11 @@ python terminal/main.py
 
 Create and edit a `.env` file at the project root with the following variables:
 
-```env
-
-GEMINI_API_KEY=...
-GROQ_API_KEY=...
-HUGGINGFACE_TOKEN=...
-OPENAI_API_KEY=...
-MCP_API_KEY=...
-```
+    GEMINI_API_KEY=...
+    GROQ_API_KEY=...
+    HUGGINGFACE_TOKEN=...
+    OPENAI_API_KEY=...
+    MCP_API_KEY=...
 
 - Ollama does not require an API key but must be installed and the daemon running.
 - Per‑user config and data files live in:
@@ -238,9 +226,7 @@ Files created:
 
 ## Quick Start
 
-```bash
-python terminal/main.py
-```
+    python terminal/main.py
 
 - Type `/help` to see the full command catalog.
 - Switch models anytime with `/switch [model]` (e.g., `/switch groq`).
@@ -309,11 +295,9 @@ You can ship a single-file binary for operators who don’t want Python on the h
 
 Example with PyInstaller:
 
-```bash
-pip install pyinstaller
-pyinstaller --onefile --name nexusai terminal/main.py
-# Output will be in the dist/ directory as 'nexusai' (or nexusai.exe on Windows)
-```
+    pip install pyinstaller
+    pyinstaller --onefile --name nexusai terminal/main.py
+    # Output will be in the dist/ directory as 'nexusai' (or nexusai.exe on Windows)
 
 Distribute the binary and provide instructions to set environment variables (or bundle an `.env`).
 
@@ -337,29 +321,27 @@ Distribute the binary and provide instructions to set environment variables (or 
 
 ## Project Structure
 
-```text
-NEXUS-AI.io/
-├── index.html                # Website homepage
-├── app.js                    # Website functionality
-├── styles.css                # Website styles
-├── CHANGELOG.md              # Version history
-├── terminal/                 # Main application (CLI)
-│   ├── main.py               # Entry point
-│   ├── requirements.txt      # Dependencies
-│   ├── install_*.{bat,sh}    # OS installers (root also contains installers)
-│   └── tests/                # Unit tests
-├── advanced_features.py
-├── analytics_monitor.py
-├── code_review_assistant.py
-├── context_aware_ai.py
-├── creative_tools.py
-├── games_learning.py
-├── advanced_security.py
-├── task_manager.py
-├── theme_manager.py
-├── integration_hub.py
-└── README.md
-```
+    NEXUS-AI.io/
+    ├── index.html                # Website homepage
+    ├── app.js                    # Website functionality
+    ├── styles.css                # Website styles
+    ├── CHANGELOG.md              # Version history
+    ├── terminal/                 # Main application (CLI)
+    │   ├── main.py               # Entry point
+    │   ├── requirements.txt      # Dependencies
+    │   ├── install_*.{bat,sh}    # OS installers (root also contains installers)
+    │   └── tests/                # Unit tests
+    ├── advanced_features.py
+    ├── analytics_monitor.py
+    ├── code_review_assistant.py
+    ├── context_aware_ai.py
+    ├── creative_tools.py
+    ├── games_learning.py
+    ├── advanced_security.py
+    ├── task_manager.py
+    ├── theme_manager.py
+    ├── integration_hub.py
+    └── README.md
 
 ---
 

@@ -20,6 +20,7 @@ import json
 import threading
 import openai
 import ollama
+from groq import Groq
 try:
     import google.generativeai as genai
     from PIL import Image as PILImage  # Rename to avoid conflict if any
