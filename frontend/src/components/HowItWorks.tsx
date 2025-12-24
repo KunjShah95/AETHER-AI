@@ -3,63 +3,59 @@ import { Laptop, Server, ShieldCheck, ArrowRight } from "lucide-react";
 
 export function HowItWorks() {
     return (
-        <section className="py-24 bg-black relative z-20">
-            <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">
-                        How AetherAI Works
+        <section className="py-32 bg-black relative z-20">
+            <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" />
+
+            <div className="max-w-7xl mx-auto px-6 relative z-10">
+                <div className="text-center mb-24">
+                    <h2 className="text-4xl md:text-5xl font-heading font-bold mb-6 text-white tracking-tight">
+                        Architecture of <span className="text-indigo-500">Privacy</span>
                     </h2>
-                    <p className="text-lg text-neutral-400 max-w-2xl mx-auto">
-                        A local-first architecture designed for privacy and speed.
+                    <p className="text-lg text-neutral-400 max-w-2xl mx-auto leading-relaxed">
+                        A local-first pipeline designed to keep your intellectual property safe while delivering cloud-grade intelligence.
                     </p>
                 </div>
 
-                <div className="flex flex-col md:flex-row items-center justify-center gap-8 relative">
-                    {/* Step 1 */}
-                    <div className="flex flex-col items-center text-center max-w-xs relative z-10">
-                        <div className="w-20 h-20 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/10">
-                            <Laptop className="w-10 h-10 text-indigo-400" />
-                        </div>
-                        <h3 className="text-xl font-bold text-white mb-2">1. Install Locally</h3>
-                        <p className="text-neutral-400 text-sm">
-                            Download the CLI or desktop app. It runs as a background service on your machine.
-                        </p>
-                    </div>
+                <div className="flex flex-col md:flex-row items-start justify-center gap-8 relative">
 
-                    {/* Arrow 1 */}
-                    <div className="hidden md:block text-neutral-700">
-                        <ArrowRight className="w-8 h-8" />
+                    {/* Connecting Line (Pro) */}
+                    <div className="absolute top-12 left-[15%] right-[15%] h-[2px] bg-gradient-to-r from-indigo-500/0 via-indigo-500/50 to-indigo-500/0 hidden md:block -z-10" />
+
+                    {/* Step 1 */}
+                    <div className="flex flex-col items-center text-center max-w-xs relative group mx-auto md:mx-0">
+                        <div className="w-24 h-24 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-center mb-8 shadow-2xl shadow-indigo-500/10 group-hover:shadow-indigo-500/30 group-hover:scale-105 transition-all duration-300 relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <Laptop className="w-10 h-10 text-indigo-400 relative z-10" />
+                        </div>
+                        <h3 className="text-xl font-heading font-bold text-white mb-3">1. Install Core</h3>
+                        <p className="text-neutral-400 text-sm leading-relaxed px-4">
+                            One-line install via pip. The lightweight daemon runs in the background, consuming minimal resources.
+                        </p>
                     </div>
 
                     {/* Step 2 */}
-                    <div className="flex flex-col items-center text-center max-w-xs relative z-10">
-                        <div className="w-20 h-20 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/10">
-                            <Server className="w-10 h-10 text-purple-400" />
+                    <div className="flex flex-col items-center text-center max-w-xs relative group mx-auto md:mx-0 mt-8 md:mt-0">
+                        <div className="w-24 h-24 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-center mb-8 shadow-2xl shadow-blue-500/10 group-hover:shadow-blue-500/30 group-hover:scale-105 transition-all duration-300 relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <Server className="w-10 h-10 text-blue-400 relative z-10" />
                         </div>
-                        <h3 className="text-xl font-bold text-white mb-2">2. Select Model</h3>
-                        <p className="text-neutral-400 text-sm">
-                            Choose from Llama 3, Mistral, or connect to OpenAI/Anthropic APIs if you prefer cloud.
+                        <h3 className="text-xl font-heading font-bold text-white mb-3">2. Choose Engine</h3>
+                        <p className="text-neutral-400 text-sm leading-relaxed px-4">
+                            Select `ollama` for 100% offline privacy, or connect to `groq`/`gemini` for massive context windows.
                         </p>
-                    </div>
-
-                    {/* Arrow 2 */}
-                    <div className="hidden md:block text-neutral-700">
-                        <ArrowRight className="w-8 h-8" />
                     </div>
 
                     {/* Step 3 */}
-                    <div className="flex flex-col items-center text-center max-w-xs relative z-10">
-                        <div className="w-20 h-20 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/10">
-                            <ShieldCheck className="w-10 h-10 text-emerald-400" />
+                    <div className="flex flex-col items-center text-center max-w-xs relative group mx-auto md:mx-0 mt-8 md:mt-0">
+                        <div className="w-24 h-24 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-center mb-8 shadow-2xl shadow-emerald-500/10 group-hover:shadow-emerald-500/30 group-hover:scale-105 transition-all duration-300 relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <ShieldCheck className="w-10 h-10 text-emerald-400 relative z-10" />
                         </div>
-                        <h3 className="text-xl font-bold text-white mb-2">3. Secure Inference</h3>
-                        <p className="text-neutral-400 text-sm">
-                            Your code is analyzed locally. No data leaves your device without your explicit permission.
+                        <h3 className="text-xl font-heading font-bold text-white mb-3">3. Secure Workflow</h3>
+                        <p className="text-neutral-400 text-sm leading-relaxed px-4">
+                            All context retrieval (RAG) happens locally. We sanitize inputs before they ever touch a model.
                         </p>
                     </div>
-
-                    {/* Connecting Line (Background) */}
-                    <div className="absolute top-10 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-emerald-500/20 hidden md:block -z-10" />
                 </div>
             </div>
         </section>

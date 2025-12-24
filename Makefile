@@ -91,16 +91,16 @@ dev-install:
 # Run linters
 lint:
 	@echo "Running linters..."
-	python -m ruff check aetherai terminal --fix
-	python -m black --check aetherai terminal
-	python -m mypy aetherai terminal --ignore-missing-imports
+	python -m ruff check terminal --fix
+	python -m black --check terminal
+	python -m mypy terminal --ignore-missing-imports
 	@echo "Linting complete!"
 
 # Auto-format code
 format:
 	@echo "Formatting code..."
-	python -m black aetherai terminal
-	python -m ruff check aetherai terminal --fix
+	python -m black terminal
+	python -m ruff check terminal --fix
 	@echo "Formatting complete!"
 
 # Run pytest

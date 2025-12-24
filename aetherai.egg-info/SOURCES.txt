@@ -10,6 +10,7 @@ README.md
 SECURITY.md
 pyproject.toml
 setup.cfg
+setup.py
 aetherai.egg-info/PKG-INFO
 aetherai.egg-info/SOURCES.txt
 aetherai.egg-info/dependency_links.txt
@@ -53,6 +54,7 @@ terminal/persona_manager.py
 terminal/plugin_manager.py
 terminal/py.typed
 terminal/rag.py
+terminal/requirements-dev.txt
 terminal/requirements.txt
 terminal/skills.md
 terminal/skills_manager.py

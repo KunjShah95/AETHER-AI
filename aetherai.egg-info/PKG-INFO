@@ -1,15 +1,11 @@
-# PKG-INFO
-
 Metadata-Version: 2.4
 Name: aetherai
 Version: 1.0.0
 Summary: AetherAI - Production-ready, secure, multi-model AI terminal assistant with RAG, voice, and developer tools
-Home-page: <https://github.com/KunjShah95/NEXUS-AI.io>
-Author: Kunj Shah
 Author-email: Kunj Shah <kunjshah.cloudcomputing@gmail.com>
 Maintainer-email: Kunj Shah <kunjshah.cloudcomputing@gmail.com>
 License: MIT License
-
+        
         Copyright (c) 2025 KUNJ SHAH
         
         Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,11 +26,11 @@ License: MIT License
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         SOFTWARE.
         
-Project-URL: Homepage, <https://kunjshah95.github.io/NEXUS-AI.io/>
-Project-URL: Documentation, <https://kunjshah95.github.io/NEXUS-AI.io/docs>
-Project-URL: Repository, <https://github.com/KunjShah95/NEXUS-AI.io.git>
-Project-URL: Issues, <https://github.com/KunjShah95/NEXUS-AI.io/issues>
-Project-URL: Changelog, <https://github.com/KunjShah95/NEXUS-AI.io/blob/main/CHANGELOG.md>
+Project-URL: Homepage, https://kunjshah95.github.io/NEXUS-AI.io/
+Project-URL: Documentation, https://kunjshah95.github.io/NEXUS-AI.io/docs
+Project-URL: Repository, https://github.com/KunjShah95/NEXUS-AI.io.git
+Project-URL: Issues, https://github.com/KunjShah95/NEXUS-AI.io/issues
+Project-URL: Changelog, https://github.com/KunjShah95/NEXUS-AI.io/blob/main/CHANGELOG.md
 Keywords: ai,terminal,assistant,llm,gemini,groq,ollama,openai,rag,voice,cli,developer-tools,code-review,productivity
 Classifier: Development Status :: 4 - Beta
 Classifier: Environment :: Console
@@ -68,6 +64,8 @@ Requires-Dist: pyyaml>=6.0.1
 Requires-Dist: requests>=2.32.0
 Requires-Dist: typing-extensions>=4.12.0
 Requires-Dist: pydantic>=2.7.0
+Requires-Dist: passlib>=1.7.4
+Requires-Dist: bcrypt>=4.0.0
 Requires-Dist: numpy>=1.24.0
 Requires-Dist: pillow>=10.0.0
 Requires-Dist: docker>=7.1.0
@@ -105,7 +103,7 @@ Provides-Extra: all
 Requires-Dist: aetherai[dev,rag,server,voice,web]; extra == "all"
 Dynamic: license-file
 
-## 🚀 NEXUS AI Terminal Assistant (AetherAI)
+# 🚀 NEXUS AI Terminal Assistant (AetherAI)
 
 [![PyPI version](https://img.shields.io/pypi/v/aetherai?color=blue&logo=python)](https://pypi.org/project/aetherai/)
 [![Python](https://img.shields.io/pypi/pyversions/aetherai)](https://pypi.org/project/aetherai/)
@@ -142,38 +140,44 @@ Production‑ready, secure, multi‑model AI for your terminal. Switch between G
 
 ### 🚀 Quick Install (Recommended)
 
-    # Using pip
-    pip install aetherai
+```bash
+# Using pip
+pip install aetherai
 
-    # Using uv (faster!)
-    uv pip install aetherai
+# Using uv (faster!)
+uv pip install aetherai
+```
 
 After installation, run the assistant:
 
-    aetherai
-    # or
-    nexus-ai
+```bash
+aetherai
+# or
+nexus-ai
+```
 
 ### 📦 Installation Extras
 
 Choose the features you need:
 
-    # Lightweight install (core only - ~100MB)
-    pip install aetherai
+```bash
+# Lightweight install (core only - ~100MB)
+pip install aetherai
 
-    # Full experience (voice, RAG, ML, server - like original)
-    pip install "aetherai[full]"
+# Full experience (voice, RAG, ML, server - like original)
+pip install "aetherai[full]"
 
-    # Specific features
-    pip install "aetherai[voice]"      # Voice input/output
-    pip install "aetherai[rag]"        # RAG knowledge base
-    pip install "aetherai[ml]"         # HuggingFace transformers
-    pip install "aetherai[server]"     # FastAPI web server
-    pip install "aetherai[db]"         # Database integrations
+# Specific features
+pip install "aetherai[voice]"      # Voice input/output
+pip install "aetherai[rag]"        # RAG knowledge base
+pip install "aetherai[ml]"         # HuggingFace transformers
+pip install "aetherai[server]"     # FastAPI web server
+pip install "aetherai[db]"         # Database integrations
 
-    # Development
-    pip install "aetherai[dev]"        # Testing & linting tools
-    pip install "aetherai[all]"        # Everything including dev tools
+# Development
+pip install "aetherai[dev]"        # Testing & linting tools
+pip install "aetherai[all]"        # Everything including dev tools
+```
 
 ### 🔧 Non-OS scripts (consolidated)
 
@@ -184,20 +188,22 @@ Choose the features you need:
 
 ### 🛠️ From source (for development)
 
-    # Clone
-    git clone https://github.com/KunjShah95/NEXUS-AI.io.git
-    cd NEXUS-AI.io
+```bash
+# Clone
+git clone https://github.com/KunjShah95/NEXUS-AI.io.git
+cd NEXUS-AI.io
 
-    # Install in editable mode with dev dependencies
-    pip install -e ".[dev]"
+# Install in editable mode with dev dependencies
+pip install -e ".[dev]"
 
-    # Configure environment
-    cp .env.example .env   # set your API keys; see below
+# Configure environment
+cp .env.example .env   # set your API keys; see below
 
-    # Run
-    aetherai
-    # or directly
-    python terminal/main.py
+# Run
+aetherai
+# or directly
+python terminal/main.py
+```
 
 ---
 
@@ -205,11 +211,13 @@ Choose the features you need:
 
 Create and edit a `.env` file at the project root with the following variables:
 
-    GEMINI_API_KEY=...
-    GROQ_API_KEY=...
-    HUGGINGFACE_TOKEN=...
-    OPENAI_API_KEY=...
-    MCP_API_KEY=...
+```env
+GEMINI_API_KEY=...
+GROQ_API_KEY=...
+HUGGINGFACE_TOKEN=...
+OPENAI_API_KEY=...
+MCP_API_KEY=...
+```
 
 - Ollama does not require an API key but must be installed and the daemon running.
 - Per‑user config and data files live in:
@@ -226,7 +234,9 @@ Files created:
 
 ## Quick Start
 
-    python terminal/main.py
+```bash
+python terminal/main.py
+```
 
 - Type `/help` to see the full command catalog.
 - Switch models anytime with `/switch [model]` (e.g., `/switch groq`).
@@ -295,9 +305,11 @@ You can ship a single-file binary for operators who don’t want Python on the h
 
 Example with PyInstaller:
 
-    pip install pyinstaller
-    pyinstaller --onefile --name nexusai terminal/main.py
-    # Output will be in the dist/ directory as 'nexusai' (or nexusai.exe on Windows)
+```bash
+pip install pyinstaller
+pyinstaller --onefile --name nexusai terminal/main.py
+# Output will be in the dist/ directory as 'nexusai' (or nexusai.exe on Windows)
+```
 
 Distribute the binary and provide instructions to set environment variables (or bundle an `.env`).
 
@@ -321,27 +333,29 @@ Distribute the binary and provide instructions to set environment variables (or 
 
 ## Project Structure
 
-    NEXUS-AI.io/
-    ├── index.html                # Website homepage
-    ├── app.js                    # Website functionality
-    ├── styles.css                # Website styles
-    ├── CHANGELOG.md              # Version history
-    ├── terminal/                 # Main application (CLI)
-    │   ├── main.py               # Entry point
-    │   ├── requirements.txt      # Dependencies
-    │   ├── install_*.{bat,sh}    # OS installers (root also contains installers)
-    │   └── tests/                # Unit tests
-    ├── advanced_features.py
-    ├── analytics_monitor.py
-    ├── code_review_assistant.py
-    ├── context_aware_ai.py
-    ├── creative_tools.py
-    ├── games_learning.py
-    ├── advanced_security.py
-    ├── task_manager.py
-    ├── theme_manager.py
-    ├── integration_hub.py
-    └── README.md
+```text
+NEXUS-AI.io/
+├── index.html                # Website homepage
+├── app.js                    # Website functionality
+├── styles.css                # Website styles
+├── CHANGELOG.md              # Version history
+├── terminal/                 # Main application (CLI)
+│   ├── main.py               # Entry point
+│   ├── requirements.txt      # Dependencies
+│   ├── install_*.{bat,sh}    # OS installers (root also contains installers)
+│   └── tests/                # Unit tests
+├── advanced_features.py
+├── analytics_monitor.py
+├── code_review_assistant.py
+├── context_aware_ai.py
+├── creative_tools.py
+├── games_learning.py
+├── advanced_security.py
+├── task_manager.py
+├── theme_manager.py
+├── integration_hub.py
+└── README.md
+```
 
 ---
 

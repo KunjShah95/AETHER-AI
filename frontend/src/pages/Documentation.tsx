@@ -35,11 +35,11 @@ const Documentation = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 text-white">
+        <div className="min-h-screen bg-black text-white">
             {/* Animated Background */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-500/10 via-transparent to-transparent blur-3xl animate-pulse" />
-                <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-blue-500/10 via-transparent to-transparent blur-3xl animate-pulse delay-1000" />
+                <div className="absolute top-0 left-0 w-full h-full bg-grid-white/[0.02]" />
+                <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-indigo-500/10 blur-3xl" />
             </div>
 
             {/* Header */}
@@ -62,8 +62,8 @@ const Documentation = () => {
                                     <BookOpen className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                                        AETHER AI Documentation
+                                    <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                                        NEXUS AI Documentation
                                     </h1>
                                     <p className="text-xs text-slate-400">Production-ready AI Terminal Assistant</p>
                                 </div>
@@ -110,7 +110,7 @@ const Documentation = () => {
                 <div className="max-w-screen-2xl mx-auto px-6 py-8">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                         <p className="text-slate-400 text-sm">
-                            © 2024 AETHER AI. Open source and free forever.
+                            © 2025 NEXUS AI. Open source and free forever.
                         </p>
                         <div className="flex gap-6">
                             <a href="https://github.com/KunjShah95/NEXUS-AI.io"
