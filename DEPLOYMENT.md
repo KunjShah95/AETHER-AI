@@ -45,8 +45,11 @@ This guide addresses common frontend deployment issues and provides solutions fo
 
 ```bash
 # Vercel will run these commands automatically:
-cd frontend && NPM_CONFIG_PRODUCTION=false npm ci && npm run build
+cd frontend && NPM_CONFIG_PRODUCTION=false npm ci
+cd frontend && npm run build
 ```
+
+> Note: installation and build are separated to avoid redundant installs; Vercel persists `node_modules` between steps.
 
 ### Option 2: Docker Deployment
 
