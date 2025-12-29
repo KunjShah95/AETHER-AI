@@ -14,7 +14,7 @@ export function Footer() {
                                 <Terminal size={20} strokeWidth={2.5} />
                             </div>
                             <span className="text-white font-heading font-bold text-2xl tracking-wide">
-                                NEXUS AI
+                                AETHER AI
                             </span>
                         </div>
                         <p className="text-neutral-400 text-sm max-w-sm leading-relaxed">
@@ -38,8 +38,8 @@ export function Footer() {
                     <div className="space-y-4">
                         <h4 className="text-white font-semibold tracking-wide">Community</h4>
                         <ul className="space-y-2 text-sm text-neutral-400">
-                            <li><a href="https://github.com/KunjShah95/NEXUS-AI.io" className="hover:text-indigo-400 transition-colors">GitHub</a></li>
-                            <li><a href="https://github.com/KunjShah95/NEXUS-AI.io/issues" className="hover:text-indigo-400 transition-colors">Issues</a></li>
+                            <li><a href="https://github.com/KunjShah95/AETHER-AI.io" className="hover:text-indigo-400 transition-colors">GitHub</a></li>
+                            <li><a href="https://github.com/KunjShah95/AETHER-AI.io/issues" className="hover:text-indigo-400 transition-colors">Issues</a></li>
                             <li><a href="#" className="hover:text-indigo-400 transition-colors">Discord (Soon)</a></li>
                         </ul>
                     </div>
@@ -47,7 +47,7 @@ export function Footer() {
 
                 <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
                     <p className="text-neutral-500 text-sm">
-                        &copy; 2025 NEXUS AI. Distributed under MIT License.
+                        &copy; 2025 AETHER AI. Distributed under MIT License.
                     </p>
 
                     <div className="flex items-center gap-6">

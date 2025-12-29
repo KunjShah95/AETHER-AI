@@ -14,8 +14,8 @@ We welcome contributions to AETHER AI! This guide will help you set up your deve
 1. **Clone the repository**:
 
     ```bash
-    git clone https://github.com/KunjShah95/NEXUS-AI.io.git
-    cd NEXUS-AI.io
+    git clone https://github.com/KunjShah95/AETHER-AI.io.git
+    cd AETHER-AI.io
     ```
 
 2. **Create a virtual environment** (recommended):
@@ -50,7 +50,7 @@ We welcome contributions to AETHER AI! This guide will help you set up your deve
 ## Project Structure
 
 ```text
-NEXUS-AI.io/
+AETHER-AI.io/
 ├── index.html                # Website homepage
 ├── app.js                    # Website functionality
 ├── styles.css                # Website styles

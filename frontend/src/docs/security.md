@@ -9,7 +9,7 @@ AETHER AI is designed with security as a core priority.
   - No shells, pipes, redirection, or wildcards are allowed.
   - File arguments are enforced to be within the current directory boundary.
 - **API Key Validation**: API keys for major providers are validated for correct format.
-- **Local Data Storage**: Configuration and user databases are stored per-user in `~/.nexus` with restricted permissions where supported.
+- **Local Data Storage**: Configuration and user databases are stored per-user in `~/.aether` with restricted permissions where supported.
 
 ## Security Commands
 

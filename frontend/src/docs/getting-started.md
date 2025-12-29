@@ -24,8 +24,8 @@ Before running an installer, verify the SHA256 checksum in `dist/SHA256SUMS.txt`
 
 ```bash
 # Clone
-git clone https://github.com/KunjShah95/NEXUS-AI.io.git
-cd NEXUS-AI.io
+git clone https://github.com/KunjShah95/AETHER-AI.io.git
+cd AETHER-AI.io
 
 # Install dependencies
 pip install -r requirements.txt
@@ -54,8 +54,8 @@ MCP_API_KEY=...
 
 Per‑user config and data files live in:
 
-- **Windows**: `%USERPROFILE%\.nexus`
-- **macOS/Linux**: `~/.nexus`
+- **Windows**: `%USERPROFILE%\.aether`
+- **macOS/Linux**: `~/.aether`
 
 ## Quick Start
 

@@ -65,7 +65,7 @@ export function Features() {
                         </span>
                     </h2>
                     <p className="text-lg text-neutral-400 leading-relaxed">
-                        NEXUS AI isn't just a wrapper. It's a comprehensive operating system for your terminal,
+                        AETHER AI isn't just a wrapper. It's a comprehensive operating system for your terminal,
                         designed to make you 10x more productive while keeping your hands on the keyboard.
                     </p>
                 </div>

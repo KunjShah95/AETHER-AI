@@ -21,7 +21,7 @@ const FAQS = [
     },
     {
         question: "How do I install it?",
-        answer: "Simply download the installer for your OS from the section above, or run `npm install -g nexus-ai` if you prefer the CLI version."
+        answer: "Simply download the installer for your OS from the section above, or run `npm install -g aether-ai` if you prefer the CLI version."
     }
 ];
 
