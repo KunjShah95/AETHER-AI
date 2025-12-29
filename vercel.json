@@ -1,7 +1,7 @@
 {
-  "buildCommand": "cd frontend && npm ci --include=dev && npm run build",
+  "buildCommand": "cd frontend && NPM_CONFIG_PRODUCTION=false npm ci && npm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npm ci --include=dev",
+  "installCommand": "cd frontend && NPM_CONFIG_PRODUCTION=false npm ci",
   "framework": null,
   "rewrites": [
     {

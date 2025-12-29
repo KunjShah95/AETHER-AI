@@ -22,7 +22,7 @@ This guide addresses common frontend deployment issues and provides solutions fo
 
 - Updated `vercel.json` with proper monorepo support
 - Added security headers
-- Improved build/install commands using `npm ci --include=dev` to ensure devDependencies (TypeScript, Vite) are available during builds
+- Improved build/install commands using `NPM_CONFIG_PRODUCTION=false npm ci` to ensure devDependencies (TypeScript, Vite) are available during builds (compatible with older npm versions)
 - Added redirects for API routes
 
 ### 4. **Package Scripts Enhanced**
@@ -45,7 +45,7 @@ This guide addresses common frontend deployment issues and provides solutions fo
 
 ```bash
 # Vercel will run these commands automatically:
-cd frontend && npm ci --include=dev && npm run build
+cd frontend && NPM_CONFIG_PRODUCTION=false npm ci && npm run build
 ```
 
 ### Option 2: Docker Deployment
