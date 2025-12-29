@@ -361,7 +361,7 @@ class SecurityManager:
         sanitized = input_str.strip().replace("\0", "")
         for pattern in self.blocklist_patterns:
             if pattern.search(sanitized):
-                self.log_violation(f'Blocked pattern detected')
+                self.log_violation('Blocked pattern detected')
                 raise SecurityError("Blocked dangerous pattern")
         return sanitized
 
@@ -411,7 +411,7 @@ class SecurityManager:
                 return False
             for pattern in self.prompt_injection_patterns:
                 if pattern.search(s):
-                    logging.warning(f"Prompt injection pattern detected")
+                    logging.warning("Prompt injection pattern detected")
                     return True
         except Exception:
             pass
@@ -746,10 +746,8 @@ class AIManager:
         """Analyze an image using a vision-capable model (Gemini)."""
         if not self.gemini:
             return "❌ Gemini model not active (required for vision)"
-        
         if not PILImage:
-            return "❌ PIL/Pillow not installed (pip install pillow)"
-        
+            return "❌ PIL/Pillow not installed (pip install pillow)"        
         if not os.path.exists(image_path):
             return f"❌ Image not found: {image_path}"
         
@@ -767,7 +765,6 @@ class AIManager:
             return response.text
         except Exception as e:
             return f"❌ Vision analysis failed: {str(e)}"
-
 # --- User Management ---
 class UserManager:
     def __init__(self):

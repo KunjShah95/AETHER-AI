@@ -1,4 +1,8 @@
 {
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
+    "installCommand": "NPM_CONFIG_PRODUCTION=false npm ci",
+    "framework": null,
     "rewrites": [
         {
             "source": "/(.*)",
