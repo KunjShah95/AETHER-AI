@@ -39,7 +39,7 @@ export const Navbar = () => {
                         <Terminal size={18} strokeWidth={3} />
                     </div>
                     <span className="text-white font-bold text-lg tracking-tight ml-1">
-                        NEXUS
+                        AETHER AI
                         <span className="text-indigo-400">AI</span>
                     </span>
                 </a>
