@@ -5,12 +5,12 @@ import { Terminal, Maximize2, Minus, X } from 'lucide-react';
 
 export const TerminalWindow = ({ className }: { className?: string }) => {
     const [lines, setLines] = useState([
-        { type: 'command', content: 'nexus init --mode=production' },
-        { type: 'output', content: 'Initializing NEXUS engine v2.4.0...' },
+        { type: 'command', content: 'aether init --mode=production' },
+        { type: 'output', content: 'Initializing AETHER engine v2.4.0...' },
         { type: 'output', content: '✓ Neural Core loaded (20ms)' },
         { type: 'output', content: '✓ Security Protocols active' },
         { type: 'output', content: '✓ Connected to local LLM cluster' },
-        { type: 'command', content: 'nexus analyze --target=./src' },
+        { type: 'command', content: 'aether analyze --target=./src' },
         { type: 'output', content: 'Scanning codebase for vulnerabilities...' },
     ]);
 
@@ -25,7 +25,7 @@ export const TerminalWindow = ({ className }: { className?: string }) => {
                 </div>
                 <div className="text-neutral-500 text-xs flex items-center gap-1.5 opacity-50">
                     <Terminal size={10} />
-                    <span>user@nexus-ai:~</span>
+                    <span>user@aether-ai:~</span>
                 </div>
                 <div className="w-10" /> {/* Spacer for centering */}
             </div>

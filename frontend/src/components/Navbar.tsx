@@ -39,8 +39,7 @@ export const Navbar = () => {
                         <Terminal size={18} strokeWidth={3} />
                     </div>
                     <span className="text-white font-bold text-lg tracking-tight ml-1">
-                        AETHER AI
-                        <span className="text-indigo-400">AI</span>
+                        AETHER <span className="text-indigo-400">AI</span>
                     </span>
                 </a>
 
@@ -60,7 +59,7 @@ export const Navbar = () => {
                 {/* Actions */}
                 <div className="hidden md:flex items-center gap-4">
                     <a
-                        href="https://github.com/KunjShah95/NEXUS-AI.io"
+                        href="https://github.com/KunjShah95/AETHER-AI.io"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-neutral-400 hover:text-white transition-colors"

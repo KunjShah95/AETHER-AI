@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Terminal as TerminalIcon, Maximize2, Minus, X } from 'lucide-react';
 
 const COMMANDS = [
-    { cmd: 'nexus init', output: 'Initializing Nexus AI environment...' },
-    { cmd: 'nexus connect --model=llama-3', output: 'Connected to local Llama 3 instance. Ready.' },
-    { cmd: 'nexus analyze src/App.tsx', output: 'Analyzing App.tsx...\nFound 2 potential optimizations.\nSecurity check passed.' },
-    { cmd: 'nexus chat "How do I optimize this?"', output: 'To optimize this component, consider memoizing the callback functions...' },
+    { cmd: 'aether init', output: 'Initializing Aether AI environment...' },
+    { cmd: 'aether connect --model=llama-3', output: 'Connected to local Llama 3 instance. Ready.' },
+    { cmd: 'aether analyze src/App.tsx', output: 'Analyzing App.tsx...\nFound 2 potential optimizations.\nSecurity check passed.' },
+    { cmd: 'aether chat "How do I optimize this?"', output: 'To optimize this component, consider memoizing the callback functions...' },
 ];
 
 export function Terminal() {
@@ -69,7 +69,7 @@ export function Terminal() {
                 </div>
                 <div className="text-neutral-400 text-xs flex items-center gap-2">
                     <TerminalIcon className="w-3 h-3" />
-                    <span>nexus-cli — 80x24</span>
+                    <span>aether-cli — 80x24</span>
                 </div>
                 <div className="flex items-center gap-2 text-neutral-500">
                     <Minus className="w-3 h-3" />
@@ -80,7 +80,7 @@ export function Terminal() {
 
             {/* Content */}
             <div ref={scrollRef} className="p-4 text-neutral-300 flex-1 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-neutral-700">
-                <div className="text-neutral-500 mb-4">Welcome to Nexus AI CLI v2.0.0</div>
+                <div className="text-neutral-500 mb-4">Welcome to Aether AI CLI v2.0.0</div>
 
                 {lines.map((line, idx) => (
                     <div key={idx} className={`${line.type === 'cmd' ? 'text-white' : 'text-neutral-400 whitespace-pre-wrap'}`}>

@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/Button";
 
 export function DownloadSection() {
     const [downloadCount, setDownloadCount] = useState<number>(() => {
-        const stored = typeof window !== 'undefined' ? localStorage.getItem('nexusDownloadCount') : null;
+        const stored = typeof window !== 'undefined' ? localStorage.getItem('aetherDownloadCount') : null;
         return stored ? parseInt(stored) : 1240; // Fake starting number for social proof
     });
 
     const handleDownload = () => {
         const newCount = downloadCount + 1;
         setDownloadCount(newCount);
-        localStorage.setItem('nexusDownloadCount', newCount.toString());
+        localStorage.setItem('aetherDownloadCount', newCount.toString());
     };
 
     return (
@@ -32,9 +32,9 @@ export function DownloadSection() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {[
-                        { name: 'Windows', icon: Monitor, cmd: 'irm nexus.ai/win | iex', file: 'install_windows.bat' },
-                        { name: 'Linux', icon: Terminal, cmd: 'curl -sL nexus.ai/lin | bash', file: 'install_linux.sh' },
-                        { name: 'macOS', icon: Command, cmd: 'curl -sL nexus.ai/mac | bash', file: 'install_mac.sh' }
+                        { name: 'Windows', icon: Monitor, cmd: 'irm aether.ai/win | iex', file: 'install_windows.bat' },
+                        { name: 'Linux', icon: Terminal, cmd: 'curl -sL aether.ai/lin | bash', file: 'install_linux.sh' },
+                        { name: 'macOS', icon: Command, cmd: 'curl -sL aether.ai/mac | bash', file: 'install_mac.sh' }
                     ].map((os) => (
                         <div key={os.name} className="bg-neutral-900/40 backdrop-blur border border-white/10 rounded-3xl p-8 text-center hover:border-indigo-500/50 transition-all duration-300 group relative overflow-hidden flex flex-col">
                             <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />

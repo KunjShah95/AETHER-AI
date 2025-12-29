@@ -63,7 +63,7 @@ const Documentation = () => {
                                 </div>
                                 <div>
                                     <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-                                        NEXUS AI Documentation
+                                        AETHER AI Documentation
                                     </h1>
                                     <p className="text-xs text-slate-400">Production-ready AI Terminal Assistant</p>
                                 </div>
@@ -110,10 +110,10 @@ const Documentation = () => {
                 <div className="max-w-screen-2xl mx-auto px-6 py-8">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                         <p className="text-slate-400 text-sm">
-                            © 2025 NEXUS AI. Open source and free forever.
+                            © 2025 AETHER AI. Open source and free forever.
                         </p>
                         <div className="flex gap-6">
-                            <a href="https://github.com/KunjShah95/NEXUS-AI.io"
+                            <a href="https://github.com/KunjShah95/AETHER-AI.io"
                                 className="text-slate-400 hover:text-purple-400 transition-colors text-sm">
                                 GitHub
                             </a>

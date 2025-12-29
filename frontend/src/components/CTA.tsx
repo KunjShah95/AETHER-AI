@@ -78,7 +78,7 @@ const CARDS = [
         designation: "Open Source Maintainer",
         content: (
             <p>
-                The terminal integration is seamless. I love how I can just type <Highlight>nexus chat</Highlight> and get answers right in my workflow.
+                The terminal integration is seamless. I love how I can just type <Highlight>aether chat</Highlight> and get answers right in my workflow.
             </p>
         ),
     },

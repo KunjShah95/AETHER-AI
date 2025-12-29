@@ -49,7 +49,7 @@ export function Hero() {
                             size="lg"
                             variant="outline"
                             className="w-full sm:w-auto text-base rounded-full h-12 px-8 border-white/10 bg-white/5 hover:bg-white/10 text-white"
-                            onClick={() => window.open('https://github.com/KunjShah95/NEXUS-AI.io', '_blank')}
+                            onClick={() => window.open('https://github.com/KunjShah95/AETHER-AI.io', '_blank')}
                         >
                             <Github className="mr-2 h-5 w-5" />
                             View Source

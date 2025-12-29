@@ -1,8 +1,8 @@
 # AETHER AI Terminal Assistant
 
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen)](https://kunjshah95.github.io/NEXUS-AI.io/)
-[![Version](https://img.shields.io/badge/Version-4.0.0-blue)](https://github.com/KunjShah95/NEXUS-AI.io/blob/main/CHANGELOG.md)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](https://github.com/KunjShah95/NEXUS-AI.io/blob/main/LICENSE)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen)](https://kunjshah95.github.io/AETHER-AI.io/)
+[![Version](https://img.shields.io/badge/Version-4.0.0-blue)](https://github.com/KunjShah95/AETHER-AI.io/blob/main/CHANGELOG.md)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](https://github.com/KunjShah95/AETHER-AI.io/blob/main/LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-green)](https://www.python.org/)
 
 Production‑ready, secure, multi‑model AI for your terminal. Switch between Google Gemini, Groq, Ollama (local), HuggingFace, ChatGPT (OpenAI), and MCP with one CLI, enriched by security controls, utilities, and an extensible modular architecture. Now featuring autonomous agents, Docker management, and multimodal capabilities.

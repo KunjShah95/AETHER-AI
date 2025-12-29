@@ -1,9 +1,9 @@
-# 🚀 NEXUS AI Terminal Assistant (AetherAI)
+# 🚀 AETHER AI Terminal Assistant
 
 [![PyPI version](https://img.shields.io/pypi/v/aetherai?color=blue&logo=python)](https://pypi.org/project/aetherai/)
 [![Python](https://img.shields.io/pypi/pyversions/aetherai)](https://pypi.org/project/aetherai/)
 [![Downloads](https://img.shields.io/pypi/dm/aetherai)](https://pypi.org/project/aetherai/)
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen)](https://kunjshah95.github.io/NEXUS-AI.io/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen)](https://kunjshah95.github.io/AETHER-AI.io/)
 [![Version](https://img.shields.io/badge/Version-1.0.0-blue)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -48,7 +48,7 @@ After installation, run the assistant:
 ```bash
 aetherai
 # or
-nexus-ai
+aether-ai
 ```
 
 ### 📦 Installation Extras
@@ -85,8 +85,8 @@ pip install "aetherai[all]"        # Everything including dev tools
 
 ```bash
 # Clone
-git clone https://github.com/KunjShah95/NEXUS-AI.io.git
-cd NEXUS-AI.io
+git clone https://github.com/KunjShah95/AETHER-AI.io.git
+cd AETHER-AI.io
 
 # Install in editable mode with dev dependencies
 pip install -e ".[dev]"
@@ -116,14 +116,14 @@ MCP_API_KEY=...
 
 - Ollama does not require an API key but must be installed and the daemon running.
 - Per‑user config and data files live in:
-  - Windows: `%USERPROFILE%\\.nexus`
-  - macOS/Linux: `~/.nexus`
+  - Windows: `%USERPROFILE%\.aether`
+  - macOS/Linux: `~/.aether`
 
 Files created:
 
-- ~/.nexus/config.yaml (default model)
-- ~/.nexus/users.json (local users)
-- ~/.nexus/notes.txt (quick notes)
+- ~/.aether/config.yaml (default model)
+- ~/.aether/users.json (local users)
+- ~/.aether/notes.txt (quick notes)
 
 ---
 
@@ -174,7 +174,7 @@ A compact subset of the most useful commands. Use `/help` for the complete list.
 
 - Install Ollama: <https://ollama.ai>
 - Pull a model (examples): `ollama pull llama3`, `ollama pull mistral`
-- In NEXUS:
+- In AETHER AI:
   - `/ollama-models` — lists installed models with size, family, params, quantization, modified date
   - `/ollama-models llama3:8b` — full specs for a single model
   - `/switch ollama llama3:8b` — use a specific local model
@@ -190,7 +190,7 @@ Troubleshooting:
 - Input sanitization blocks dangerous patterns and suspicious Unicode.
 - Safe command allowlist for `/run` (no shells/pipes/redirection/wildcards; current dir boundary enforced for file args).
 - API key format validation for major providers.
-- Config and user DB stored per user in `~/.nexus` with restricted permissions where supported.
+- Config and user DB stored per user in `~/.aether` with restricted permissions where supported.
 
 ---
 
@@ -202,8 +202,8 @@ Example with PyInstaller:
 
 ```bash
 pip install pyinstaller
-pyinstaller --onefile --name nexusai terminal/main.py
-# Output will be in the dist/ directory as 'nexusai' (or nexusai.exe on Windows)
+pyinstaller --onefile --name aetherai terminal/main.py
+# Output will be in the dist/ directory as 'aetherai' (or aetherai.exe on Windows)
 ```
 
 Distribute the binary and provide instructions to set environment variables (or bundle an `.env`).
@@ -229,7 +229,7 @@ Distribute the binary and provide instructions to set environment variables (or 
 ## Project Structure
 
 ```text
-NEXUS-AI.io/
+AETHER-AI.io/
 ├── index.html                # Website homepage
 ├── app.js                    # Website functionality
 ├── styles.css                # Website styles
@@ -287,9 +287,9 @@ MIT License — see [LICENSE](LICENSE)
 
 ### Website Deployment
 
-The NEXUS AI website (frontend) is ready for deployment to Vercel:
+The AETHER AI website (frontend) is ready for deployment to Vercel:
 
-- **Quick Deploy**: [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/KunjShah95/NEXUS-AI.io)
+- **Quick Deploy**: [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/KunjShah95/AETHER-AI.io)
 - **Detailed Guide**: See [DEPLOYMENT.md](DEPLOYMENT.md) for complete instructions
 - **Configuration**: All necessary files (`vercel.json`, optimized `vite.config.ts`) are included
 
@@ -304,8 +304,8 @@ The website features:
 
 ## Support & Links
 
-- Website: [Project website](https://kunjshah95.github.io/NEXUS-AI.io/)
-- Issues: [Issue tracker](https://github.com/KunjShah95/NEXUS-AI.io/issues)
+- Website: [Project website](https://kunjshah95.github.io/AETHER-AI.io/)
+- Issues: [Issue tracker](https://github.com/KunjShah95/AETHER-AI.io/issues)
 - Changelog: [CHANGELOG.md](CHANGELOG.md)
 - Security Policy: [SECURITY.md](SECURITY.md)
 - Code of Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
