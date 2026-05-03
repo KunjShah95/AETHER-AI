@@ -1,3 +1,0 @@
-[console_scripts]
-aetherai = terminal.main:main
-nexus-ai = terminal.main:main
