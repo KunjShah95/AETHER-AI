@@ -5,30 +5,30 @@ import (
 )
 
 type Session struct {
-	ID        string      `json:"id"`
-	ProjectID string      `json:"project_id"`
-	CreatedAt time.Time   `json:"created_at"`
-	Messages  []Message   `json:"messages"`
+	ID        string       `json:"id"`
+	ProjectID string       `json:"project_id"`
+	CreatedAt time.Time    `json:"created_at"`
+	Messages  []Message    `json:"messages"`
 	State     SessionState `json:"state"`
 }
 
 type Message struct {
-	Role    string `json:"role"`
-	Parts   []Part `json:"parts"`
+	Role    string    `json:"role"`
+	Parts   []Part    `json:"parts"`
 	Created time.Time `json:"created"`
 }
 
 type Part struct {
-	Type         string     `json:"type"`
-	Content      string     `json:"content,omitempty"`
-	ToolUse      *ToolUse   `json:"tool_use,omitempty"`
-	ToolResultID string     `json:"tool_result_id,omitempty"`
+	Type         string   `json:"type"`
+	Content      string   `json:"content,omitempty"`
+	ToolUse      *ToolUse `json:"tool_use,omitempty"`
+	ToolResultID string   `json:"tool_result_id,omitempty"`
 }
 
 type ToolUse struct {
-	Name      string                 `json:"name"`
-	Input     map[string]interface{} `json:"input"`
-	ID        string                 `json:"id"`
+	Name  string                 `json:"name"`
+	Input map[string]interface{} `json:"input"`
+	ID    string                 `json:"id"`
 }
 
 type ToolResult struct {
