@@ -5,6 +5,7 @@ This folder contains the user-facing documentation for Sentinel AI.
 ## Start here
 
 - `../README.md` - quick start, build steps, and API overview
+- `usage/README.md` - detailed walkthrough for daily use
 - `superpowers/specs/` - product and feature specs
 - `superpowers/plans/` - implementation plans and phase details
 
