@@ -8,6 +8,7 @@ import (
 	"sentinel-ai/internal/config"
 	"sentinel-ai/internal/mcp"
 	"sentinel-ai/internal/session"
+	"sentinel-ai/internal/skills"
 	"sentinel-ai/internal/tool"
 
 	"github.com/julienschmidt/httprouter"
@@ -17,6 +18,7 @@ type Server struct {
 	router         *httprouter.Router
 	cfg            *config.Config
 	sessionManager *session.Manager
+	skills         *skills.Registry
 	tools          *tool.Registry
 	mcpBridge      *mcp.Bridge
 }
@@ -25,6 +27,10 @@ func New(cfg *config.Config, store *session.Store) *Server {
 	sm := session.NewManager(store)
 	registry := tool.NewRegistryWithBuiltins()
 	bridge := mcp.NewBridge()
+	skillRegistry, _ := skills.LoadDefault(context.Background())
+	if skillRegistry == nil {
+		skillRegistry = skills.NewRegistry()
+	}
 	if err := bridge.LoadFromConfig(context.Background(), cfg.MCPs); err == nil {
 		for _, remoteTool := range bridge.Tools() {
 			registry.Register(remoteTool)
@@ -37,6 +43,7 @@ func New(cfg *config.Config, store *session.Store) *Server {
 		router:         r,
 		cfg:            cfg,
 		sessionManager: sm,
+		skills:         skillRegistry,
 		tools:          registry,
 		mcpBridge:      bridge,
 	}
@@ -52,6 +59,7 @@ func (s *Server) registerRoutes() {
 	// Session management
 	s.router.POST("/session", s.createSessionHandler)
 	s.router.GET("/session/:id", s.getSessionHandler)
+	s.router.GET("/skills", s.listSkillsHandler)
 
 	// Chat and tools
 	s.router.POST("/session/:id/chat", s.chatHandler)

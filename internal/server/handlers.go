@@ -33,6 +33,14 @@ type GetSessionResponse struct {
 	State     string            `json:"state"`
 }
 
+type SkillResponse struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Trigger     []string `json:"trigger,omitempty"`
+	ApplyTo     []string `json:"apply_to,omitempty"`
+	Path        string   `json:"path"`
+}
+
 type ChatRequest struct {
 	Message string `json:"message"`
 }
@@ -113,6 +121,23 @@ func (s *Server) getSessionHandler(w http.ResponseWriter, r *http.Request, ps ht
 		Messages:  sess.Messages,
 		State:     sess.State.Model,
 	})
+}
+
+func (s *Server) listSkillsHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+	items := make([]SkillResponse, 0)
+	if s.skills != nil {
+		for _, skill := range s.skills.List() {
+			items = append(items, SkillResponse{
+				Name:        skill.Name,
+				Description: skill.Description,
+				Trigger:     skill.Trigger,
+				ApplyTo:     skill.ApplyTo,
+				Path:        skill.Path,
+			})
+		}
+	}
+	json.NewEncoder(w).Encode(items)
 }
 
 // Send chat message
