@@ -2,24 +2,25 @@ package session
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"time"
 
-	"modernc.org/sqlite"
+	_ "modernc.org/sqlite"
 )
 
 type Store struct {
-	db *sqlite.Conn
+	db *sql.DB
 }
 
 func NewStore(path string) (*Store, error) {
-	conn, err := sqlite.Open(path)
+	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		return nil, err
 	}
 
-	s := &Store{db: conn}
+	s := &Store{db: db}
 	if err := s.migrate(); err != nil {
 		return nil, err
 	}
@@ -28,7 +29,7 @@ func NewStore(path string) (*Store, error) {
 }
 
 func (s *Store) migrate() error {
-	_, err := s.db.Exec(`
+	schema := `
 		CREATE TABLE IF NOT EXISTS sessions (
 			id TEXT PRIMARY KEY,
 			project_id TEXT NOT NULL,
@@ -44,7 +45,8 @@ func (s *Store) migrate() error {
 			FOREIGN KEY(session_id) REFERENCES sessions(id)
 		);
 		CREATE INDEX IF NOT EXISTS idx_messages_session ON messages(session_id);
-	`)
+	`
+	_, err := s.db.Exec(schema)
 	return err
 }
 
@@ -52,7 +54,8 @@ func (s *Store) Create(ctx context.Context, projectID string) (*Session, error) 
 	id := generateID()
 	now := time.Now().Unix()
 
-	_, err := s.db.Exec(
+	_, err := s.db.ExecContext(
+		ctx,
 		"INSERT INTO sessions (id, project_id, created_at, state) VALUES (?, ?, ?, ?)",
 		id, projectID, now, "{}",
 	)
@@ -77,7 +80,7 @@ func (s *Store) Get(ctx context.Context, id string) (*Session, error) {
 		State     string
 	}
 
-	err := s.db.QueryRow("SELECT id, project_id, created_at, state FROM sessions WHERE id = ?", id).
+	err := s.db.QueryRowContext(ctx, "SELECT id, project_id, created_at, state FROM sessions WHERE id = ?", id).
 		Scan(&row.ID, &row.ProjectID, &row.CreatedAt, &row.State)
 	if err != nil {
 		return nil, err
@@ -105,7 +108,8 @@ func (s *Store) AddMessage(ctx context.Context, sessionID string, msg Message) e
 		return err
 	}
 
-	_, err = s.db.Exec(
+	_, err = s.db.ExecContext(
+		ctx,
 		"INSERT INTO messages (session_id, role, parts, created_at) VALUES (?, ?, ?, ?)",
 		sessionID, msg.Role, string(partsJSON), now,
 	)
