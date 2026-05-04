@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"sentinel-ai/internal/config"
+	"sentinel-ai/internal/server"
+	"sentinel-ai/internal/session"
 )
 
 func main() {
@@ -21,6 +23,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Config loaded: provider=%s, model=%s\n", cfg.LLMs.Provider, cfg.LLMs.Model)
-	fmt.Println("Server is ready to accept connections")
+	// Create session store
+	store, err := session.NewStore("sentinel_sessions.db")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating session store: %v\n", err)
+		os.Exit(1)
+	}
+	defer store.Close()
+
+	// Create and start HTTP server
+	httpServer := server.New(cfg, store)
+	if err := httpServer.Start(":8080"); err != nil {
+		fmt.Fprintf(os.Stderr, "Error starting server: %v\n", err)
+		os.Exit(1)
+	}
 }
