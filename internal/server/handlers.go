@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/julienschmidt/httprouter"
 	"sentinel-ai/internal/provider"
 	"sentinel-ai/internal/session"
-	"sentinel-ai/internal/tool"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 type HealthResponse struct {
@@ -27,9 +27,9 @@ type CreateSessionResponse struct {
 }
 
 type GetSessionResponse struct {
-	SessionID string                 `json:"session_id"`
-	Messages  []session.Message      `json:"messages"`
-	State     string                 `json:"state"`
+	SessionID string            `json:"session_id"`
+	Messages  []session.Message `json:"messages"`
+	State     string            `json:"state"`
 }
 
 type ChatRequest struct {
@@ -187,8 +187,7 @@ func (s *Server) toolHandler(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 
 	// Get tool from registry
-	registry := tool.NewRegistryWithBuiltins()
-	t := registry.Get(req.ToolName)
+	t := s.tools.Get(req.ToolName)
 	if t == nil {
 		http.Error(w, fmt.Sprintf("Tool not found: %s", req.ToolName), http.StatusNotFound)
 		return

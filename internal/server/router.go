@@ -1,22 +1,35 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
 	"sentinel-ai/internal/config"
+	"sentinel-ai/internal/mcp"
 	"sentinel-ai/internal/session"
+	"sentinel-ai/internal/tool"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 type Server struct {
 	router         *httprouter.Router
 	cfg            *config.Config
 	sessionManager *session.Manager
+	tools          *tool.Registry
+	mcpBridge      *mcp.Bridge
 }
 
 func New(cfg *config.Config, store *session.Store) *Server {
 	sm := session.NewManager(store)
+	registry := tool.NewRegistryWithBuiltins()
+	bridge := mcp.NewBridge()
+	if err := bridge.LoadFromConfig(context.Background(), cfg.MCPs); err == nil {
+		for _, remoteTool := range bridge.Tools() {
+			registry.Register(remoteTool)
+		}
+	}
 
 	r := httprouter.New()
 
@@ -24,6 +37,8 @@ func New(cfg *config.Config, store *session.Store) *Server {
 		router:         r,
 		cfg:            cfg,
 		sessionManager: sm,
+		tools:          registry,
+		mcpBridge:      bridge,
 	}
 
 	s.registerRoutes()
