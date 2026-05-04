@@ -89,6 +89,21 @@ func (m *Manager) CompactSession(ctx context.Context, sessionID string, keepLast
 	return sess, nil
 }
 
+func (m *Manager) SetSummary(ctx context.Context, sessionID string, summary string) (*Session, error) {
+	sess, err := m.GetSession(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	sess.State.Summary = summary
+	if err := m.store.UpdateState(ctx, sessionID, sess.State); err != nil {
+		return nil, err
+	}
+
+	m.active[sessionID] = sess
+	return sess, nil
+}
+
 func (m *Manager) CloseSession(ctx context.Context, id string) error {
 	if _, ok := m.active[id]; !ok {
 		return nil

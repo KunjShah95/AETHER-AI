@@ -10,6 +10,7 @@ import (
 	"sentinel-ai/internal/session"
 	"sentinel-ai/internal/skills"
 	"sentinel-ai/internal/tool"
+	"sentinel-ai/pkg/protocol"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -21,6 +22,7 @@ type Server struct {
 	skills         *skills.Registry
 	tools          *tool.Registry
 	mcpBridge      *mcp.Bridge
+	protocolHub    *protocol.Hub
 }
 
 func New(cfg *config.Config, store *session.Store) *Server {
@@ -36,6 +38,13 @@ func New(cfg *config.Config, store *session.Store) *Server {
 			registry.Register(remoteTool)
 		}
 	}
+	localAgent := protocol.Agent{
+		ID:           "sentinel-ai",
+		Name:         "Sentinel AI",
+		Role:         "coding-assistant",
+		Capabilities: []string{"chat", "tool-use", "skill-loading", "session-compaction", "acp", "a2a"},
+	}
+	protocolHub := protocol.NewHub(localAgent)
 
 	r := httprouter.New()
 
@@ -46,6 +55,7 @@ func New(cfg *config.Config, store *session.Store) *Server {
 		skills:         skillRegistry,
 		tools:          registry,
 		mcpBridge:      bridge,
+		protocolHub:    protocolHub,
 	}
 
 	s.registerRoutes()
@@ -60,6 +70,10 @@ func (s *Server) registerRoutes() {
 	s.router.POST("/session", s.createSessionHandler)
 	s.router.GET("/session/:id", s.getSessionHandler)
 	s.router.GET("/skills", s.listSkillsHandler)
+	s.router.GET("/protocol", s.protocolStatusHandler)
+	s.router.POST("/protocol/handshake", s.protocolHandshakeHandler)
+	s.router.POST("/protocol/message", s.protocolMessageHandler)
+	s.router.POST("/protocol/handoff", s.protocolHandoffHandler)
 
 	// Chat and tools
 	s.router.POST("/session/:id/chat", s.chatHandler)
