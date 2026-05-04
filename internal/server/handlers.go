@@ -8,6 +8,7 @@ import (
 
 	"sentinel-ai/internal/provider"
 	"sentinel-ai/internal/session"
+	"sentinel-ai/internal/tool"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -44,11 +45,14 @@ type ChatResponse struct {
 type ToolRequest struct {
 	ToolName string                 `json:"tool_name"`
 	Input    map[string]interface{} `json:"input"`
+	Approved bool                   `json:"approved,omitempty"`
 }
 
 type ToolResponse struct {
-	Result string `json:"result"`
-	Error  string `json:"error,omitempty"`
+	Result   string `json:"result,omitempty"`
+	Error    string `json:"error,omitempty"`
+	Approved bool   `json:"approved,omitempty"`
+	Status   string `json:"status,omitempty"`
 }
 
 // Health check endpoint
@@ -193,6 +197,22 @@ func (s *Server) toolHandler(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
+	if err := tool.Authorize(t.Name(), t.PermissionLevel(), req.Approved); err != nil {
+		permErr, _ := err.(*tool.PermissionError)
+		status := http.StatusForbidden
+		if permErr != nil && permErr.Level == tool.PermAsk {
+			status = http.StatusPreconditionRequired
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(status)
+		json.NewEncoder(w).Encode(ToolResponse{
+			Error:    err.Error(),
+			Approved: false,
+			Status:   "approval_required",
+		})
+		return
+	}
+
 	// Execute tool
 	result, err := t.Execute(r.Context(), req.Input)
 	if err != nil {
@@ -205,7 +225,9 @@ func (s *Server) toolHandler(w http.ResponseWriter, r *http.Request, ps httprout
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(ToolResponse{
-		Result: result,
+		Result:   result,
+		Approved: true,
+		Status:   "executed",
 	})
 }
 
