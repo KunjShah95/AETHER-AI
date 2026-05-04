@@ -26,7 +26,7 @@ func (m *Model) View() string {
 	}
 
 	messageLines := m.renderMessages()
-	
+
 	// Calculate scroll and display messages
 	startIdx := 0
 	if len(messageLines) > messageHeight {
@@ -64,7 +64,8 @@ func (m *Model) View() string {
 	// Input area
 	s.WriteString(inputStyle.Render("> " + m.input.View()))
 	s.WriteString("\n")
-	s.WriteString("╰");s.WriteString(strings.Repeat("─", m.width-1))
+	s.WriteString("╰")
+	s.WriteString(strings.Repeat("─", m.width-2))
 
 	return s.String()
 }
