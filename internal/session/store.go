@@ -86,6 +86,11 @@ func (s *Store) Get(ctx context.Context, id string) (*Session, error) {
 		return nil, err
 	}
 
+	messages, err := s.getMessages(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
 	var state SessionState
 	if err := json.Unmarshal([]byte(row.State), &state); err != nil {
 		state = SessionState{}
@@ -95,9 +100,40 @@ func (s *Store) Get(ctx context.Context, id string) (*Session, error) {
 		ID:        row.ID,
 		ProjectID: row.ProjectID,
 		CreatedAt: time.Unix(row.CreatedAt, 0),
-		Messages:  []Message{},
+		Messages:  messages,
 		State:     state,
 	}, nil
+}
+
+func (s *Store) getMessages(ctx context.Context, sessionID string) ([]Message, error) {
+	rows, err := s.db.QueryContext(ctx, "SELECT role, parts, created_at FROM messages WHERE session_id = ? ORDER BY created_at ASC, id ASC", sessionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	msgs := make([]Message, 0)
+	for rows.Next() {
+		var role string
+		var partsJSON string
+		var createdAt int64
+		if err := rows.Scan(&role, &partsJSON, &createdAt); err != nil {
+			return nil, err
+		}
+
+		var parts []Part
+		if err := json.Unmarshal([]byte(partsJSON), &parts); err != nil {
+			parts = []Part{}
+		}
+
+		msgs = append(msgs, Message{
+			Role:    role,
+			Parts:   parts,
+			Created: time.Unix(createdAt, 0),
+		})
+	}
+
+	return msgs, rows.Err()
 }
 
 func (s *Store) AddMessage(ctx context.Context, sessionID string, msg Message) error {
@@ -112,6 +148,25 @@ func (s *Store) AddMessage(ctx context.Context, sessionID string, msg Message) e
 		ctx,
 		"INSERT INTO messages (session_id, role, parts, created_at) VALUES (?, ?, ?, ?)",
 		sessionID, msg.Role, string(partsJSON), now,
+	)
+	return err
+}
+
+func (s *Store) UpdateState(ctx context.Context, sessionID string, state SessionState) error {
+	stateJSON, err := json.Marshal(state)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.ExecContext(ctx, "UPDATE sessions SET state = ? WHERE id = ?", string(stateJSON), sessionID)
+	return err
+}
+
+func (s *Store) DeleteMessagesBefore(ctx context.Context, sessionID string, keepFrom int64) error {
+	_, err := s.db.ExecContext(
+		ctx,
+		"DELETE FROM messages WHERE session_id = ? AND id NOT IN (SELECT id FROM messages WHERE session_id = ? ORDER BY created_at DESC, id DESC LIMIT ?)",
+		sessionID, sessionID, keepFrom,
 	)
 	return err
 }

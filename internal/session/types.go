@@ -41,4 +41,5 @@ type SessionState struct {
 	Model            string `json:"model"`
 	TokenCount       int    `json:"token_count"`
 	CompletionTokens int    `json:"completion_tokens"`
+	Summary          string `json:"summary,omitempty"`
 }

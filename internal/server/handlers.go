@@ -31,6 +31,7 @@ type GetSessionResponse struct {
 	SessionID string            `json:"session_id"`
 	Messages  []session.Message `json:"messages"`
 	State     string            `json:"state"`
+	Summary   string            `json:"summary,omitempty"`
 }
 
 type SkillResponse struct {
@@ -120,6 +121,7 @@ func (s *Server) getSessionHandler(w http.ResponseWriter, r *http.Request, ps ht
 		SessionID: sessionID,
 		Messages:  sess.Messages,
 		State:     sess.State.Model,
+		Summary:   sess.State.Summary,
 	})
 }
 
@@ -191,6 +193,12 @@ func (s *Server) chatHandler(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 
 	s.sessionManager.AddMessage(ctx, sessionID, assistantMsg)
+
+	if current, err := s.sessionManager.GetSession(ctx, sessionID); err == nil && len(current.Messages) > 10 {
+		if compacted, compactErr := s.sessionManager.CompactSession(ctx, sessionID, 6); compactErr == nil {
+			_ = compacted
+		}
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(ChatResponse{
