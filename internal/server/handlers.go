@@ -1,9 +1,11 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"sentinel-ai/internal/provider"
@@ -31,7 +33,24 @@ type GetSessionResponse struct {
 	SessionID string            `json:"session_id"`
 	Messages  []session.Message `json:"messages"`
 	State     string            `json:"state"`
+	Provider  string            `json:"provider,omitempty"`
+	Model     string            `json:"model,omitempty"`
 	Summary   string            `json:"summary,omitempty"`
+}
+
+type UpdateSessionConfigRequest struct {
+	Provider string `json:"provider,omitempty"`
+	Model    string `json:"model,omitempty"`
+}
+
+type ModelsResponse struct {
+	Provider string   `json:"provider"`
+	CurrentModel string `json:"current_model,omitempty"`
+	Models   []string `json:"models"`
+}
+
+type modelLister interface {
+	ListModels(ctx context.Context) ([]string, error)
 }
 
 type SkillResponse struct {
@@ -121,8 +140,109 @@ func (s *Server) getSessionHandler(w http.ResponseWriter, r *http.Request, ps ht
 		SessionID: sessionID,
 		Messages:  sess.Messages,
 		State:     sess.State.Model,
+		Provider:  sess.State.Provider,
+		Model:     sess.State.Model,
 		Summary:   sess.State.Summary,
 	})
+}
+
+func (s *Server) updateSessionConfigHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Method != http.MethodPatch && r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	sessionID := ps.ByName("id")
+	var req UpdateSessionConfigRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	sess, err := s.sessionManager.GetSession(r.Context(), sessionID)
+	if err != nil {
+		http.Error(w, "Session not found", http.StatusNotFound)
+		return
+	}
+
+	if strings.TrimSpace(req.Provider) != "" {
+		sess.State.Provider = strings.ToLower(strings.TrimSpace(req.Provider))
+	}
+	if strings.TrimSpace(req.Model) != "" {
+		sess.State.Model = strings.TrimSpace(req.Model)
+	}
+
+	if _, err := s.sessionManager.UpdateState(r.Context(), sessionID, sess.State); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to update session config: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(GetSessionResponse{
+		SessionID: sessionID,
+		State:     sess.State.Model,
+		Provider:  sess.State.Provider,
+		Model:     sess.State.Model,
+		Summary:   sess.State.Summary,
+	})
+}
+
+func (s *Server) modelsHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	s.writeModelsResponse(w, r, nil)
+}
+
+func (s *Server) sessionModelsHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	sess, err := s.sessionManager.GetSession(r.Context(), ps.ByName("id"))
+	if err != nil {
+		http.Error(w, "Session not found", http.StatusNotFound)
+		return
+	}
+
+	s.writeModelsResponse(w, r, sess)
+}
+
+func (s *Server) writeModelsResponse(w http.ResponseWriter, r *http.Request, sess *session.Session) {
+	w.Header().Set("Content-Type", "application/json")
+	if s.gateway == nil || s.gateway.Get() == nil {
+		json.NewEncoder(w).Encode(ModelsResponse{Provider: "", CurrentModel: "", Models: []string{}})
+		return
+	}
+
+	providerName := s.gateway.Active()
+	providerInstance := s.gateway.Get()
+	currentModel := providerInstance.Model()
+	if sess != nil {
+		if resolved, err := s.resolveProvider(r.Context(), sess); err == nil && resolved != nil {
+			providerInstance = resolved
+			currentModel = resolved.Model()
+			if strings.TrimSpace(sess.State.Provider) != "" {
+				providerName = sess.State.Provider
+			}
+		} else if strings.TrimSpace(sess.State.Model) != "" {
+			currentModel = sess.State.Model
+		}
+	}
+
+	if lister, ok := providerInstance.(modelLister); ok {
+		models, err := lister.ListModels(r.Context())
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Failed to list models: %v", err), http.StatusBadGateway)
+			return
+		}
+		json.NewEncoder(w).Encode(ModelsResponse{Provider: providerName, CurrentModel: currentModel, Models: models})
+		return
+	}
+
+	json.NewEncoder(w).Encode(ModelsResponse{Provider: providerName, CurrentModel: currentModel, Models: []string{providerInstance.Model()}})
 }
 
 func (s *Server) listSkillsHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -177,8 +297,7 @@ func (s *Server) chatHandler(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	// TODO: Send to LLM provider and get response
-	response := "Placeholder response from LLM"
+	response := s.respondToSession(ctx, sessionID)
 
 	// Add assistant message to session
 	assistantMsg := session.Message{
@@ -205,6 +324,79 @@ func (s *Server) chatHandler(w http.ResponseWriter, r *http.Request, ps httprout
 		Response: response,
 		Role:     "assistant",
 	})
+}
+
+func (s *Server) respondToSession(ctx context.Context, sessionID string) string {
+	sess, err := s.sessionManager.GetSession(ctx, sessionID)
+	if err != nil {
+		return "Placeholder response from LLM"
+	}
+
+	providerInstance, err := s.resolveProvider(ctx, sess)
+	if err != nil || providerInstance == nil {
+		return "Placeholder response from LLM"
+	}
+
+	msgs := make([]provider.Message, 0, len(sess.Messages))
+	for _, msg := range sess.Messages {
+		content := sessionMessageText(msg)
+		if content == "" {
+			continue
+		}
+		msgs = append(msgs, provider.Message{
+			Role:    providerRole(msg.Role),
+			Content: content,
+		})
+	}
+
+	resp, err := providerInstance.Send(ctx, msgs, nil)
+	if err != nil || resp == nil || strings.TrimSpace(resp.Content) == "" {
+		return "Placeholder response from LLM"
+	}
+
+	return resp.Content
+}
+
+func (s *Server) resolveProvider(ctx context.Context, sess *session.Session) (provider.Provider, error) {
+	if s.providerResolver != nil {
+		return s.providerResolver(ctx, sess)
+	}
+	if s.gateway != nil && s.gateway.Get() != nil && strings.TrimSpace(sess.State.Provider) == "" && strings.TrimSpace(sess.State.Model) == "" {
+		return s.gateway.Get(), nil
+	}
+	merged := s.cfg.LLMs
+	if strings.TrimSpace(sess.State.Provider) != "" {
+		merged.Provider = sess.State.Provider
+	}
+	if strings.TrimSpace(sess.State.Model) != "" {
+		merged.Model = sess.State.Model
+	}
+	gw := provider.NewGateway()
+	if err := gw.InitializeFromLLMConfig(merged); err != nil && gw.Get() == nil {
+		return nil, err
+	}
+	return gw.Get(), nil
+}
+
+func providerRole(role string) string {
+	switch strings.ToLower(strings.TrimSpace(role)) {
+	case "assistant":
+		return "assistant"
+	case "system":
+		return "system"
+	default:
+		return "user"
+	}
+}
+
+func sessionMessageText(msg session.Message) string {
+	var parts []string
+	for _, part := range msg.Parts {
+		if strings.TrimSpace(part.Content) != "" {
+			parts = append(parts, part.Content)
+		}
+	}
+	return strings.Join(parts, "\n")
 }
 
 // Execute a tool
@@ -276,7 +468,3 @@ func (s *Server) streamHandler(w http.ResponseWriter, r *http.Request, ps httpro
 	// TODO: Implement streaming responses
 	fmt.Fprintf(w, "data: {\"message\": \"streaming not yet implemented\"}\n\n")
 }
-
-var (
-	_ provider.Provider
-)

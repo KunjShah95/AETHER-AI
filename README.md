@@ -79,35 +79,45 @@ The server listens on `:8080` by default.
 ## Built-in tools
 
 ### `read`
+
 Read a file from disk.
 
 Input:
+
 - `path` string
 
 ### `write`
+
 Write or overwrite a file.
 
 Input:
+
 - `path` string
 - `content` string
 
 ### `glob`
+
 Find files using a glob pattern.
 
 Input:
+
 - `pattern` string
 
 ### `grep`
+
 Search source files for a pattern.
 
 Input:
+
 - `pattern` string
 - `path` string, optional
 
 ### `bash`
+
 Run an approved shell command.
 
 Input:
+
 - `command` string
 - `description` string, optional
 
@@ -124,18 +134,23 @@ A skill is a markdown file with optional YAML front matter. Sentinel exposes loa
 ## HTTP API
 
 ### `GET /health`
+
 Returns server health.
 
 ### `POST /session`
+
 Creates a new session.
 
 ### `GET /session/:id`
+
 Fetches a session and its messages.
 
 ### `POST /session/:id/chat`
+
 Adds a chat message to a session.
 
 ### `POST /session/:id/tool`
+
 Runs a tool.
 
 Request example:
@@ -151,9 +166,11 @@ Request example:
 ```
 
 ### `GET /session/:id/stream`
+
 Streams session output using Server-Sent Events.
 
 ### `GET /skills`
+
 Lists loaded skills.
 
 ## Tool permissions

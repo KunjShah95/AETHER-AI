@@ -36,10 +36,13 @@ func Load() (*Config, error) {
 
 func (c *Config) Validate() error {
 	if c.LLMs.Provider == "" {
-		c.LLMs.Provider = "anthropic"
+		c.LLMs.Provider = "ollama"
 	}
 	if c.LLMs.Model == "" {
-		c.LLMs.Model = "claude-sonnet-4-20250514"
+		c.LLMs.Model = "llama3.2"
+	}
+	if c.LLMs.Provider == "ollama" && c.LLMs.BaseURL == "" {
+		c.LLMs.BaseURL = "http://localhost:11434"
 	}
 	return nil
 }

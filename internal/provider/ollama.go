@@ -7,12 +7,20 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
+	"strings"
 )
 
 type OllamaProvider struct {
 	baseURL string
 	model   string
 	client  *http.Client
+}
+
+type ollamaTagsResponse struct {
+	Models []struct {
+		Name string `json:"name"`
+	} `json:"models"`
 }
 
 func NewOllama(baseURL, model string) *OllamaProvider {
@@ -88,6 +96,41 @@ func (p *OllamaProvider) Send(ctx context.Context, msgs []Message, tools []Tool)
 func (p *OllamaProvider) Stream(ctx context.Context, msgs []Message, tools []Tool) (<-chan Event, error) {
 	ch := make(chan Event)
 	return ch, nil
+}
+
+func (p *OllamaProvider) ListModels(ctx context.Context) ([]string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, strings.TrimRight(p.baseURL, "/")+"/api/tags", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := p.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("ollama tags error: %s", string(body))
+	}
+
+	var decoded ollamaTagsResponse
+	if err := json.Unmarshal(body, &decoded); err != nil {
+		return nil, err
+	}
+
+	models := make([]string, 0, len(decoded.Models))
+	for _, model := range decoded.Models {
+		if strings.TrimSpace(model.Name) != "" {
+			models = append(models, model.Name)
+		}
+	}
+	sort.Strings(models)
+	return models, nil
 }
 
 func convertOllamaMessages(msgs []Message) []map[string]interface{} {

@@ -1,12 +1,18 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
-	"os/exec"
-	"path/filepath"
+	"time"
 
 	"sentinel-ai/internal/config"
+	"sentinel-ai/internal/server"
+	"sentinel-ai/internal/session"
+	"sentinel-ai/internal/tui"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
@@ -21,36 +27,95 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Start the server
-	if err := startServer(); err != nil {
+	shutdown, sessionID, err := startServer(cfg)
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error starting server: %v\n", err)
+		os.Exit(1)
+	}
+	defer func() {
+		if shutdown != nil {
+			_ = shutdown()
+		}
+	}()
+
+	program := tea.NewProgram(tui.NewModel("http://127.0.0.1:8080", sessionID), tea.WithAltScreen())
+	if _, err := program.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error running TUI: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func startServer() error {
-	// Get the path to the server binary
-	serverPath, err := getServerPath()
+func startServer(cfg *config.Config) (func() error, string, error) {
+	store, err := session.NewStore("sentinel_sessions.db")
 	if err != nil {
-		return fmt.Errorf("failed to get server path: %w", err)
+		return nil, "", err
 	}
 
-	// Spawn server as child process
-	srvCmd := exec.Command(serverPath)
-	srvCmd.Stdin = os.Stdin
-	srvCmd.Stdout = os.Stdout
-	srvCmd.Stderr = os.Stderr
+	manager := session.NewManager(store)
+	initialSession, err := manager.CreateSession(context.Background(), "default")
+	if err != nil {
+		_ = store.Close()
+		return nil, "", err
+	}
 
-	return srvCmd.Run()
+	app := server.New(cfg, store)
+	httpServer := &http.Server{
+		Addr:    ":8080",
+		Handler: app.Handler(),
+	}
+
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			fmt.Fprintf(os.Stderr, "Error starting server: %v\n", err)
+		}
+	}()
+
+	if err := waitForServer("http://127.0.0.1:8080/health", 5*time.Second); err != nil {
+		_ = httpServer.Shutdown(context.Background())
+		_ = store.Close()
+		return nil, "", err
+	}
+
+	return func() error {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := httpServer.Shutdown(ctx); err != nil {
+			_ = store.Close()
+			return err
+		}
+		return store.Close()
+	}, initialSession.ID, nil
 }
 
-func getServerPath() (string, error) {
-	// Try to find the server binary in the same directory as the sentinel binary
-	exe, err := os.Executable()
-	if err != nil {
-		return "", err
+func waitForServer(url string, timeout time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	client := &http.Client{Timeout: 750 * time.Millisecond}
+	var lastErr error
+	for {
+		select {
+		case <-ctx.Done():
+			if lastErr != nil {
+				return fmt.Errorf("server did not become ready: %w", lastErr)
+			}
+			return fmt.Errorf("server did not become ready")
+		default:
+		}
+
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			return err
+		}
+		resp, err := client.Do(req)
+		if err == nil && resp != nil && resp.StatusCode >= 200 && resp.StatusCode < 500 {
+			_ = resp.Body.Close()
+			return nil
+		}
+		if resp != nil && resp.Body != nil {
+			_ = resp.Body.Close()
+		}
+		lastErr = err
+		time.Sleep(75 * time.Millisecond)
 	}
-	exeDir := filepath.Dir(exe)
-	serverPath := filepath.Join(exeDir, "sentinel-server.exe")
-	return serverPath, nil
 }

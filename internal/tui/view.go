@@ -15,7 +15,11 @@ func (m *Model) View() string {
 	// Header
 	s.WriteString(headerStyle.Render("╭─ Sentinel AI"))
 	s.WriteString("\n")
-	s.WriteString(fmt.Sprintf("│ Session: %s\n", m.sessionID))
+	if m.sessionID == "" {
+		s.WriteString("│ Session: connecting...\n")
+	} else {
+		s.WriteString(fmt.Sprintf("│ Session: %s\n", m.sessionID))
+	}
 	s.WriteString(separatorStyle.Render("├" + strings.Repeat("─", m.width-2)))
 	s.WriteString("\n")
 
@@ -52,17 +56,27 @@ func (m *Model) View() string {
 	s.WriteString("\n")
 
 	// Status line
-	if m.processing {
+	if m.sessionID == "" && m.err != nil {
+		s.WriteString(errorStyle.Render(fmt.Sprintf("✗ Connection error: %v", m.err)))
+	} else if m.sessionID == "" {
+		s.WriteString(processingStyle.Render("⟳ Connecting to server..."))
+	} else if m.processing {
 		s.WriteString(processingStyle.Render("⟳ Thinking..."))
 	} else if m.err != nil {
 		s.WriteString(errorStyle.Render(fmt.Sprintf("✗ Error: %v", m.err)))
+	} else if m.status != "" {
+		s.WriteString(processingStyle.Render("ℹ " + m.status))
 	} else {
 		s.WriteString("│")
 	}
 	s.WriteString("\n")
 
 	// Input area
-	s.WriteString(inputStyle.Render("> " + m.input.View()))
+	if m.sessionID == "" {
+		s.WriteString(inputStyle.Render("> initializing session..."))
+	} else {
+		s.WriteString(inputStyle.Render("> " + m.input.View()))
+	}
 	s.WriteString("\n")
 	s.WriteString("╰")
 	s.WriteString(strings.Repeat("─", m.width-2))

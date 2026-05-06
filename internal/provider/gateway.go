@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
+
+	"sentinel-ai/internal/config"
 )
 
 type Gateway struct {
@@ -55,24 +58,54 @@ func (g *Gateway) Model() string {
 	return ""
 }
 
-// InitializeFromConfig sets up providers based on configuration
-func (g *Gateway) InitializeFromConfig(provider string, apiKey string) error {
+// InitializeFromLLMConfig sets up providers based on configuration.
+func (g *Gateway) InitializeFromLLMConfig(cfg config.LLMConfig) error {
+	provider := strings.ToLower(strings.TrimSpace(cfg.Provider))
+	if provider == "" {
+		provider = "ollama"
+	}
 	switch provider {
 	case "anthropic":
-		model := os.Getenv("ANTHROPIC_MODEL")
+		model := strings.TrimSpace(cfg.Model)
+		if model == "" {
+			model = os.Getenv("ANTHROPIC_MODEL")
+		}
 		if model == "" {
 			model = "claude-sonnet-4-20250514"
 		}
-		g.Register("anthropic", NewAnthropic(apiKey, model))
+		g.Register("anthropic", NewAnthropic(cfg.APIKey, model))
 	case "ollama":
-		baseURL := os.Getenv("OLLAMA_BASE_URL")
-		model := os.Getenv("OLLAMA_MODEL")
+		baseURL := strings.TrimSpace(cfg.BaseURL)
+		if baseURL == "" {
+			baseURL = os.Getenv("OLLAMA_BASE_URL")
+		}
+		model := strings.TrimSpace(cfg.Model)
 		if model == "" {
-			model = "llama2"
+			model = os.Getenv("OLLAMA_MODEL")
+		}
+		if model == "" {
+			model = "llama3.2"
 		}
 		g.Register("ollama", NewOllama(baseURL, model))
 	default:
-		return fmt.Errorf("unknown provider: %s", provider)
+		baseURL := strings.TrimSpace(cfg.BaseURL)
+		if baseURL == "" {
+			baseURL = os.Getenv("OLLAMA_BASE_URL")
+		}
+		model := strings.TrimSpace(cfg.Model)
+		if model == "" {
+			model = os.Getenv("OLLAMA_MODEL")
+		}
+		if model == "" {
+			model = "llama3.2"
+		}
+		g.Register("ollama", NewOllama(baseURL, model))
+		return fmt.Errorf("unknown provider: %s; defaulted to ollama", provider)
 	}
 	return nil
+}
+
+// InitializeFromConfig is kept for compatibility with older callers.
+func (g *Gateway) InitializeFromConfig(provider string, apiKey string) error {
+	return g.InitializeFromLLMConfig(config.LLMConfig{Provider: provider, APIKey: apiKey})
 }

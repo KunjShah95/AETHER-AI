@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/julienschmidt/httprouter"
 	"sentinel-ai/internal/session"
 	"sentinel-ai/pkg/protocol"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 type ProtocolStatusResponse struct {

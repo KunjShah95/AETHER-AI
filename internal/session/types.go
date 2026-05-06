@@ -38,6 +38,7 @@ type ToolResult struct {
 }
 
 type SessionState struct {
+	Provider         string `json:"provider,omitempty"`
 	Model            string `json:"model"`
 	TokenCount       int    `json:"token_count"`
 	CompletionTokens int    `json:"completion_tokens"`
