@@ -44,10 +44,12 @@ func New(cfg *config.Config, store *session.Store, wfManager *workflow.Manager) 
 	skillRegistry := skills.NewRegistry()
 	for _, root := range skills.DefaultRoots() {
 		if info, err := os.Stat(root); err == nil && info.IsDir() {
-			if loaded, err := skills.LoadDefault(context.Background()); err == nil && loaded != nil {
-				skillRegistry = loaded
+			loader := skills.NewLoader(root)
+			if loaded, err := loader.Load(context.Background()); err == nil && loaded != nil {
+				for _, skill := range loaded.List() {
+					skillRegistry.Register(skill)
+				}
 			}
-			break
 		}
 	}
 	if len(cfg.MCPs) > 0 {
