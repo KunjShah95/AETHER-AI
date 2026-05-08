@@ -11,6 +11,7 @@ import (
 	"sentinel-ai/internal/server"
 	"sentinel-ai/internal/session"
 	"sentinel-ai/internal/tui"
+	"sentinel-ai/internal/workflow"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -58,7 +59,8 @@ func startServer(cfg *config.Config) (func() error, string, error) {
 		return nil, "", err
 	}
 
-	app := server.New(cfg, store)
+	wfManager := workflow.NewManager()
+	app := server.New(cfg, store, wfManager)
 	httpServer := &http.Server{
 		Addr:    ":8080",
 		Handler: app.Handler(),

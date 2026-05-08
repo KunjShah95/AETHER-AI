@@ -7,6 +7,7 @@ import (
 	"sentinel-ai/internal/config"
 	"sentinel-ai/internal/server"
 	"sentinel-ai/internal/session"
+	"sentinel-ai/internal/workflow"
 )
 
 func main() {
@@ -31,8 +32,11 @@ func main() {
 	}
 	defer store.Close()
 
+	// Create workflow manager
+	wfManager := workflow.NewManager()
+
 	// Create and start HTTP server
-	httpServer := server.New(cfg, store)
+	httpServer := server.New(cfg, store, wfManager)
 	if err := httpServer.Start(":8080"); err != nil {
 		fmt.Fprintf(os.Stderr, "Error starting server: %v\n", err)
 		os.Exit(1)

@@ -3,10 +3,11 @@ package skills
 import "strings"
 
 type Metadata struct {
-	Name        string   `yaml:"name" json:"name"`
-	Description string   `yaml:"description" json:"description"`
-	Trigger     []string `yaml:"trigger" json:"trigger"`
-	ApplyTo     []string `yaml:"applyTo" json:"applyTo"`
+	Name         string   `yaml:"name" json:"name"`
+	Description  string   `yaml:"description" json:"description"`
+	Trigger      []string `yaml:"trigger" json:"trigger"`
+	ApplyTo      []string `yaml:"applyTo" json:"applyTo"`
+	AllowedTools []string `yaml:"allowedTools" json:"allowedTools"`
 }
 
 type Skill struct {

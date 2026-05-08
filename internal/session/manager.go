@@ -104,6 +104,14 @@ func (m *Manager) SetSummary(ctx context.Context, sessionID string, summary stri
 	return sess, nil
 }
 
+func (m *Manager) SetSummaryWithSummary(ctx context.Context, sessionID string, summary string) (*Session, error) {
+	sess, err := m.SetSummary(ctx, sessionID, summary)
+	if err != nil {
+		return nil, err
+	}
+	return sess, nil
+}
+
 func (m *Manager) UpdateState(ctx context.Context, sessionID string, state SessionState) (*Session, error) {
 	sess, err := m.GetSession(ctx, sessionID)
 	if err != nil {

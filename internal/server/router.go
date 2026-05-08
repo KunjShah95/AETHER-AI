@@ -12,6 +12,7 @@ import (
 	"sentinel-ai/internal/session"
 	"sentinel-ai/internal/skills"
 	"sentinel-ai/internal/tool"
+	"sentinel-ai/internal/workflow"
 	"sentinel-ai/pkg/protocol"
 
 	"github.com/julienschmidt/httprouter"
@@ -27,9 +28,10 @@ type Server struct {
 	tools            *tool.Registry
 	mcpBridge        *mcp.Bridge
 	protocolHub      *protocol.Hub
+	workflowManager  *workflow.Manager
 }
 
-func New(cfg *config.Config, store *session.Store) *Server {
+func New(cfg *config.Config, store *session.Store, wfManager *workflow.Manager) *Server {
 	if cfg == nil {
 		cfg = &config.Config{}
 	}
@@ -66,14 +68,15 @@ func New(cfg *config.Config, store *session.Store) *Server {
 	r := httprouter.New()
 
 	s := &Server{
-		router:         r,
-		cfg:            cfg,
-		sessionManager: sm,
-		gateway:        gateway,
-		skills:         skillRegistry,
-		tools:          registry,
-		mcpBridge:      bridge,
-		protocolHub:    protocolHub,
+		router:          r,
+		cfg:             cfg,
+		sessionManager:  sm,
+		gateway:         gateway,
+		skills:          skillRegistry,
+		tools:           registry,
+		mcpBridge:       bridge,
+		protocolHub:     protocolHub,
+		workflowManager: wfManager,
 	}
 
 	s.registerRoutes()
@@ -103,6 +106,27 @@ func (s *Server) registerRoutes() {
 
 	// Server-Sent Events for streaming
 	s.router.GET("/session/:id/stream", s.streamHandler)
+
+	// Workflow management - Milestones
+	s.router.POST("/milestones", s.createMilestoneHandler)
+	s.router.GET("/milestones", s.listMilestonesHandler)
+
+	// Workflow management - Milestone sub-resources (use milestone_id to avoid conflict)
+	s.router.GET("/milestones/:milestone_id/phases", s.listPhasesHandler)
+	s.router.GET("/milestones/:milestone_id/todos", s.listTodosHandler)
+	s.router.GET("/milestones/:milestone_id/roadmap", s.getRoadmapHandler)
+
+	// Single milestone operations
+	s.router.GET("/milestones/:milestone_id", s.getMilestoneHandler)
+	s.router.PUT("/milestones/:milestone_id/complete", s.completeMilestoneHandler)
+
+	// Workflow management - Phases
+	s.router.POST("/phases", s.createPhaseHandler)
+	s.router.PUT("/phases/:id/complete", s.completePhaseHandler)
+
+	// Workflow management - Todos
+	s.router.POST("/todos", s.createTodoHandler)
+	s.router.PUT("/todos/:id/complete", s.completeTodoHandler)
 }
 
 func (s *Server) Start(addr string) error {
