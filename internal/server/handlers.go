@@ -10,6 +10,7 @@ import (
 
 	"sentinel-ai/internal/provider"
 	"sentinel-ai/internal/session"
+	"sentinel-ai/internal/skills"
 	"sentinel-ai/internal/tool"
 
 	"github.com/julienschmidt/httprouter"
@@ -368,6 +369,24 @@ func (s *Server) respondToSession(ctx context.Context, sessionID string) string 
 		return "Placeholder response from LLM"
 	}
 
+	if len(sess.Messages) > 0 {
+		lastMsg := sess.Messages[len(sess.Messages)-1]
+		if lastMsg.Role == "user" {
+			text := extractMessageText(lastMsg)
+			cmd, args, isCommand := skills.ParseCommand(text)
+			if isCommand {
+				result, err := s.executeCommand(ctx, cmd, nil)
+				if err != nil {
+					return fmt.Sprintf("Command error: %v", err)
+				}
+				if args != "" {
+					return result + "\n\n(Args: " + args + ")"
+				}
+				return result
+			}
+		}
+	}
+
 	providerInstance, err := s.resolveProvider(ctx, sess)
 	if err != nil || providerInstance == nil {
 		return "Placeholder response from LLM"
@@ -426,6 +445,16 @@ func providerRole(role string) string {
 }
 
 func sessionMessageText(msg session.Message) string {
+	var parts []string
+	for _, part := range msg.Parts {
+		if strings.TrimSpace(part.Content) != "" {
+			parts = append(parts, part.Content)
+		}
+	}
+	return strings.Join(parts, "\n")
+}
+
+func extractMessageText(msg session.Message) string {
 	var parts []string
 	for _, part := range msg.Parts {
 		if strings.TrimSpace(part.Content) != "" {
