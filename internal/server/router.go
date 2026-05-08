@@ -129,6 +129,10 @@ func (s *Server) registerRoutes() {
 	// Workflow management - Todos
 	s.router.POST("/todos", s.createTodoHandler)
 	s.router.PUT("/todos/:id/complete", s.completeTodoHandler)
+
+	// Commands
+	s.router.GET("/api/v1/commands", s.listCommandsHandler)
+	s.router.POST("/api/v1/commands", s.commandHandler)
 }
 
 func (s *Server) Start(addr string) error {
