@@ -24,7 +24,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Create session store
 	store, err := session.NewStore("sentinel_sessions.db")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating session store: %v\n", err)
@@ -32,8 +31,14 @@ func main() {
 	}
 	defer store.Close()
 
-	// Create workflow manager
-	wfManager := workflow.NewManager()
+	wfStore, err := workflow.NewStore("workflow.db")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating workflow store: %v\n", err)
+		os.Exit(1)
+	}
+	defer wfStore.Close()
+
+	wfManager := workflow.NewManager(wfStore)
 
 	// Create and start HTTP server
 	httpServer := server.New(cfg, store, wfManager)

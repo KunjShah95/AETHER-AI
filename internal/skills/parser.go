@@ -4,10 +4,27 @@ import (
 	"bytes"
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"gopkg.in/yaml.v3"
 )
+
+var (
+	sectionObjective        = regexp.MustCompile(`(?s)<objective>\s*(.*?)\s*</objective>`)
+	sectionExecutionContext = regexp.MustCompile(`(?s)<execution_context>\s*(.*?)\s*</execution_context>`)
+	sectionProcess          = regexp.MustCompile(`(?s)<process>\s*(.*?)\s*</process>`)
+	flagPattern             = regexp.MustCompile(`--(\w+)=(\S+)`)
+)
+
+type rawMetadata struct {
+	Name         string   `yaml:"name"`
+	Description  string   `yaml:"description"`
+	Trigger      []string `yaml:"trigger"`
+	ApplyTo      []string `yaml:"applyTo"`
+	AllowedTools []string `yaml:"allowed-tools"`
+	ArgumentHint string   `yaml:"argument-hint"`
+}
 
 func ParseFile(path string, data []byte) (*Skill, error) {
 	meta, body, err := splitFrontMatter(data)
@@ -15,13 +32,14 @@ func ParseFile(path string, data []byte) (*Skill, error) {
 		return nil, err
 	}
 
-	var md Metadata
+	var raw rawMetadata
 	if len(meta) > 0 {
-		if err := yaml.Unmarshal(meta, &md); err != nil {
+		if err := yaml.Unmarshal(meta, &raw); err != nil {
 			return nil, fmt.Errorf("parse skill metadata: %w", err)
 		}
 	}
 
+	md := toMetadata(raw)
 	if md.Name == "" {
 		md.Name = inferNameFromPath(path)
 	}
@@ -29,11 +47,63 @@ func ParseFile(path string, data []byte) (*Skill, error) {
 		md.Description = strings.TrimSpace(firstLine(string(body)))
 	}
 
+	objective := extractSection(string(body), sectionObjective)
+	execCtx := extractSection(string(body), sectionExecutionContext)
+	process := extractSection(string(body), sectionProcess)
+
 	return &Skill{
-		Metadata: md,
-		Path:     path,
-		Content:  strings.TrimSpace(string(body)),
+		Metadata:         md,
+		Path:             path,
+		Content:          strings.TrimSpace(string(body)),
+		Objective:        objective,
+		ExecutionContext: execCtx,
+		Process:          process,
 	}, nil
+}
+
+func ParseSkillContent(path string, content string) (*Skill, error) {
+	return ParseFile(path, []byte(content))
+}
+
+func ExtractArguments(input string) (map[string]string, []string) {
+	flags := make(map[string]string)
+	var posArgs []string
+
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return flags, []string{}
+	}
+
+	matches := flagPattern.FindAllStringSubmatch(input, -1)
+	for _, match := range matches {
+		if len(match) == 3 {
+			flags[match[1]] = match[2]
+		}
+	}
+
+	remaining := flagPattern.ReplaceAllString(input, "")
+	remaining = strings.TrimSpace(remaining)
+	if remaining != "" {
+		parts := strings.Fields(remaining)
+		posArgs = parts
+	}
+
+	if posArgs == nil {
+		posArgs = []string{}
+	}
+
+	return flags, posArgs
+}
+
+func toMetadata(raw rawMetadata) Metadata {
+	return Metadata{
+		Name:         raw.Name,
+		Description:  raw.Description,
+		Trigger:      raw.Trigger,
+		ApplyTo:      raw.ApplyTo,
+		AllowedTools: raw.AllowedTools,
+		ArgumentHint: raw.ArgumentHint,
+	}
 }
 
 func splitFrontMatter(data []byte) ([]byte, []byte, error) {
@@ -50,6 +120,14 @@ func splitFrontMatter(data []byte) ([]byte, []byte, error) {
 	meta := bytes.TrimPrefix(parts[0], []byte("---"))
 	body := bytes.TrimSpace(bytes.TrimPrefix(parts[1], []byte("\n")))
 	return bytes.TrimSpace(meta), body, nil
+}
+
+func extractSection(content string, re *regexp.Regexp) string {
+	match := re.FindStringSubmatch(content)
+	if len(match) > 1 {
+		return strings.TrimSpace(match[1])
+	}
+	return ""
 }
 
 func inferNameFromPath(path string) string {

@@ -61,7 +61,14 @@ func TestChatHandlerUsesProviderResponse(t *testing.T) {
 	}
 	defer store.Close()
 
-	srv := New(&config.Config{}, store, workflow.NewManager())
+	wfStore, err := workflow.NewStore(filepath.Join(t.TempDir(), "workflow.db"))
+	if err != nil {
+		t.Fatalf("NewStore() error = %v", err)
+	}
+	defer wfStore.Close()
+	wfManager := workflow.NewManager(wfStore)
+
+	srv := New(&config.Config{}, store, wfManager)
 	mock := &mockProvider{output: "mock assistant reply"}
 	gateway := provider.NewGateway()
 	gateway.Register("mock", mock)
@@ -122,7 +129,14 @@ func TestSessionConfigUpdateSwitchesProvider(t *testing.T) {
 	}
 	defer store.Close()
 
-	srv := New(&config.Config{}, store, workflow.NewManager())
+	wfStore, err := workflow.NewStore(filepath.Join(t.TempDir(), "workflow.db"))
+	if err != nil {
+		t.Fatalf("NewStore() error = %v", err)
+	}
+	defer wfStore.Close()
+	wfManager := workflow.NewManager(wfStore)
+
+	srv := New(&config.Config{}, store, wfManager)
 	mock := &mockProvider{output: "switched provider reply", model: "mock-model"}
 	srv.gateway = nil
 	srv.providerResolver = func(ctx context.Context, sess *session.Session) (provider.Provider, error) {
@@ -194,7 +208,14 @@ func TestModelsHandlerReturnsAvailableModels(t *testing.T) {
 	}
 	defer store.Close()
 
-	srv := New(&config.Config{}, store, workflow.NewManager())
+	wfStore, err := workflow.NewStore(filepath.Join(t.TempDir(), "workflow.db"))
+	if err != nil {
+		t.Fatalf("NewStore() error = %v", err)
+	}
+	defer wfStore.Close()
+	wfManager := workflow.NewManager(wfStore)
+
+	srv := New(&config.Config{}, store, wfManager)
 	mock := &mockProvider{models: []string{"llama3.2", "mistral", "qwen2.5"}}
 	gateway := provider.NewGateway()
 	gateway.Register("ollama", mock)

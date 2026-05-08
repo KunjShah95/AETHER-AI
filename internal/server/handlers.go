@@ -110,7 +110,6 @@ type CreateTodoRequest struct {
 	PhaseID     string `json:"phase_id,omitempty"`
 	MilestoneID string `json:"milestone_id"`
 	Content     string `json:"content"`
-	Description string `json:"description,omitempty"`
 	Priority    string `json:"priority,omitempty"`
 }
 
@@ -522,7 +521,11 @@ func (s *Server) createMilestoneHandler(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	milestone := s.workflowManager.CreateMilestone(req.Name, req.Description)
+	milestone, err := s.workflowManager.CreateMilestone(r.Context(), req.Name, req.Description, req.Version)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to create milestone: %v", err), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(CreateMilestoneResponse{
@@ -537,7 +540,11 @@ func (s *Server) listMilestonesHandler(w http.ResponseWriter, r *http.Request, _
 		return
 	}
 
-	milestones := s.workflowManager.ListMilestones()
+	milestones, err := s.workflowManager.ListMilestones(r.Context())
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to list milestones: %v", err), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(milestones)
@@ -549,9 +556,9 @@ func (s *Server) getMilestoneHandler(w http.ResponseWriter, r *http.Request, ps 
 		return
 	}
 
-	milestoneID := ps.ByName("milestone_id")
-	milestone := s.workflowManager.GetMilestone(milestoneID)
-	if milestone == nil {
+	milestoneID := ps.ByName("id")
+	milestone, err := s.workflowManager.GetMilestone(r.Context(), milestoneID)
+	if err != nil {
 		http.Error(w, "Milestone not found", http.StatusNotFound)
 		return
 	}
@@ -566,8 +573,8 @@ func (s *Server) completeMilestoneHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	milestoneID := ps.ByName("milestone_id")
-	if err := s.workflowManager.CompleteMilestone(milestoneID); err != nil {
+	milestoneID := ps.ByName("id")
+	if err := s.workflowManager.CompleteMilestone(r.Context(), milestoneID); err != nil {
 		http.Error(w, fmt.Sprintf("Failed to complete milestone: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -593,7 +600,11 @@ func (s *Server) createPhaseHandler(w http.ResponseWriter, r *http.Request, _ ht
 		return
 	}
 
-	phase := s.workflowManager.CreatePhase(req.MilestoneID, req.Name, req.Description, req.Order)
+	phase, err := s.workflowManager.CreatePhase(r.Context(), req.MilestoneID, req.Name, req.Description, req.Order)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to create phase: %v", err), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(CreatePhaseResponse{
@@ -609,7 +620,11 @@ func (s *Server) listPhasesHandler(w http.ResponseWriter, r *http.Request, ps ht
 	}
 
 	milestoneID := ps.ByName("milestone_id")
-	phases := s.workflowManager.ListPhases(milestoneID)
+	phases, err := s.workflowManager.ListPhases(r.Context(), milestoneID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to list phases: %v", err), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(phases)
@@ -622,7 +637,7 @@ func (s *Server) completePhaseHandler(w http.ResponseWriter, r *http.Request, ps
 	}
 
 	phaseID := ps.ByName("id")
-	if err := s.workflowManager.CompletePhase(phaseID); err != nil {
+	if err := s.workflowManager.CompletePhase(r.Context(), phaseID); err != nil {
 		http.Error(w, fmt.Sprintf("Failed to complete phase: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -643,12 +658,21 @@ func (s *Server) createTodoHandler(w http.ResponseWriter, r *http.Request, _ htt
 		return
 	}
 
-	if req.PhaseID == "" || req.Content == "" {
-		http.Error(w, "PhaseID and Content are required", http.StatusBadRequest)
+	if req.MilestoneID == "" || req.Content == "" {
+		http.Error(w, "MilestoneID and Content are required", http.StatusBadRequest)
 		return
 	}
 
-	todo := s.workflowManager.CreateTodo(req.PhaseID, req.Content, req.Description)
+	priority := req.Priority
+	if priority == "" {
+		priority = "medium"
+	}
+
+	todo, err := s.workflowManager.CreateTodo(r.Context(), req.PhaseID, req.MilestoneID, req.Content, priority)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to create todo: %v", err), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(CreateTodoResponse{
@@ -664,7 +688,11 @@ func (s *Server) listTodosHandler(w http.ResponseWriter, r *http.Request, ps htt
 	}
 
 	milestoneID := ps.ByName("milestone_id")
-	todos := s.workflowManager.ListTodos(milestoneID)
+	todos, err := s.workflowManager.ListTodos(r.Context(), milestoneID, "")
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to list todos: %v", err), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(todos)
@@ -677,7 +705,7 @@ func (s *Server) completeTodoHandler(w http.ResponseWriter, r *http.Request, ps 
 	}
 
 	todoID := ps.ByName("id")
-	if err := s.workflowManager.CompleteTodo(todoID); err != nil {
+	if err := s.workflowManager.CompleteTodo(r.Context(), todoID); err != nil {
 		http.Error(w, fmt.Sprintf("Failed to complete todo: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -693,8 +721,11 @@ func (s *Server) getRoadmapHandler(w http.ResponseWriter, r *http.Request, ps ht
 	}
 
 	milestoneID := ps.ByName("milestone_id")
-	_ = milestoneID // TODO: filter by milestone
-	roadmap := s.workflowManager.GetRoadmap()
+	roadmap, err := s.workflowManager.GetRoadmap(r.Context(), milestoneID)
+	if err != nil {
+		http.Error(w, "Milestone not found", http.StatusNotFound)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(roadmap)

@@ -24,10 +24,18 @@ func NewLoader(roots ...string) *Loader {
 }
 
 func DefaultRoots() []string {
-	roots := []string{filepath.Join(".", "skills"), filepath.Join(".", ".agents", "skills")}
+	roots := []string{}
 	if home, err := os.UserHomeDir(); err == nil {
-		roots = append([]string{filepath.Join(home, ".sentinel", "skills")}, roots...)
+		// Sentinel's own skills
+		roots = append(roots, filepath.Join(home, ".sentinel", "skills"))
+		// Claude Code skills (gsd-*, caveman-*, etc.)
+		roots = append(roots, filepath.Join(home, ".claude", "skills"))
+		// OpenCode/Agents skills (azure-*, shadcn, etc.)
+		roots = append(roots, filepath.Join(home, ".agents", "skills"))
 	}
+	// Project-local skills
+	roots = append(roots, filepath.Join(".", "skills"))
+	roots = append(roots, filepath.Join(".", ".agents", "skills"))
 	return roots
 }
 

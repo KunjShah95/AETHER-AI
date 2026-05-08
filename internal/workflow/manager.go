@@ -1,202 +1,166 @@
 package workflow
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-type Milestone struct {
-	ID          string     `json:"id"`
-	Name        string     `json:"name"`
-	Description string     `json:"description"`
-	Status      string     `json:"status"`
-	CreatedAt   time.Time  `json:"created_at"`
-	CompletedAt *time.Time `json:"completed_at,omitempty"`
-}
-
-type Phase struct {
-	ID          string     `json:"id"`
-	MilestoneID string     `json:"milestone_id"`
-	Name        string     `json:"name"`
-	Description string     `json:"description"`
-	Status      string     `json:"status"`
-	Order       int        `json:"order"`
-	CreatedAt   time.Time  `json:"created_at"`
-	CompletedAt *time.Time `json:"completed_at,omitempty"`
-}
-
-type Todo struct {
-	ID          string     `json:"id"`
-	PhaseID     string     `json:"phase_id"`
-	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	Status      string     `json:"status"`
-	CreatedAt   time.Time  `json:"created_at"`
-	CompletedAt *time.Time `json:"completed_at,omitempty"`
-}
-
-type Roadmap struct {
-	Milestones []Milestone        `json:"milestones"`
-	Phases     map[string][]Phase `json:"phases"`
-	Todos      map[string][]Todo  `json:"todos"`
-}
-
 type Manager struct {
-	milestones map[string]*Milestone
-	phases     map[string]*Phase
-	todos      map[string]*Todo
+	store *Store
 }
 
-func NewManager() *Manager {
-	return &Manager{
-		milestones: make(map[string]*Milestone),
-		phases:     make(map[string]*Phase),
-		todos:      make(map[string]*Todo),
-	}
+func NewManager(store *Store) *Manager {
+	return &Manager{store: store}
 }
 
-func (m *Manager) CreateMilestone(name, description string) *Milestone {
+func (m *Manager) CreateMilestone(ctx context.Context, name, description, version string) (*Milestone, error) {
 	milestone := &Milestone{
-		ID:          uuid.New().String(),
+		ID:          "ms_" + uuid.New().String(),
 		Name:        name,
 		Description: description,
+		Version:     version,
 		Status:      "active",
-		CreatedAt:   time.Now(),
 	}
-	m.milestones[milestone.ID] = milestone
-	return milestone
-}
-
-func (m *Manager) GetMilestone(id string) *Milestone {
-	return m.milestones[id]
-}
-
-func (m *Manager) ListMilestones() []*Milestone {
-	result := make([]*Milestone, 0, len(m.milestones))
-	for _, m := range m.milestones {
-		result = append(result, m)
+	if err := m.store.CreateMilestone(ctx, milestone); err != nil {
+		return nil, err
 	}
-	return result
+	return milestone, nil
 }
 
-func (m *Manager) CompleteMilestone(id string) error {
-	milestone, ok := m.milestones[id]
-	if !ok {
-		return nil
+func (m *Manager) GetMilestone(ctx context.Context, id string) (*Milestone, error) {
+	return m.store.GetMilestone(ctx, id)
+}
+
+func (m *Manager) ListMilestones(ctx context.Context) ([]Milestone, error) {
+	return m.store.ListMilestones(ctx)
+}
+
+func (m *Manager) CompleteMilestone(ctx context.Context, id string) error {
+	milestone, err := m.store.GetMilestone(ctx, id)
+	if err != nil {
+		return err
 	}
 	now := time.Now()
 	milestone.Status = "completed"
 	milestone.CompletedAt = &now
-	return nil
+	return m.store.UpdateMilestone(ctx, milestone)
 }
 
-func (m *Manager) CreatePhase(milestoneID, name, description string, order int) *Phase {
+func (m *Manager) CreatePhase(ctx context.Context, milestoneID, name, description string, order int) (*Phase, error) {
 	phase := &Phase{
-		ID:          uuid.New().String(),
+		ID:          "phase_" + uuid.New().String(),
 		MilestoneID: milestoneID,
 		Name:        name,
 		Description: description,
 		Status:      "pending",
 		Order:       order,
-		CreatedAt:   time.Now(),
 	}
-	m.phases[phase.ID] = phase
-	return phase
+	if err := m.store.CreatePhase(ctx, phase); err != nil {
+		return nil, err
+	}
+	return phase, nil
 }
 
-func (m *Manager) GetPhase(id string) *Phase {
-	return m.phases[id]
+func (m *Manager) GetPhase(ctx context.Context, id string) (*Phase, error) {
+	return m.store.GetPhase(ctx, id)
 }
 
-func (m *Manager) ListPhases(milestoneID string) []*Phase {
-	var result []*Phase
-	for _, p := range m.phases {
-		if p.MilestoneID == milestoneID {
-			result = append(result, p)
-		}
-	}
-	if result == nil {
-		return []*Phase{}
-	}
-	return result
+func (m *Manager) ListPhases(ctx context.Context, milestoneID string) ([]Phase, error) {
+	return m.store.ListPhases(ctx, milestoneID)
 }
 
-func (m *Manager) UpdatePhaseStatus(id, status string) error {
-	phase, ok := m.phases[id]
-	if !ok {
-		return nil
+func (m *Manager) UpdatePhaseStatus(ctx context.Context, id, status string) error {
+	phase, err := m.store.GetPhase(ctx, id)
+	if err != nil {
+		return err
 	}
 	phase.Status = status
-	return nil
+	return m.store.UpdatePhase(ctx, phase)
 }
 
-func (m *Manager) CompletePhase(id string) error {
-	phase, ok := m.phases[id]
-	if !ok {
-		return nil
+func (m *Manager) CompletePhase(ctx context.Context, id string) error {
+	phase, err := m.store.GetPhase(ctx, id)
+	if err != nil {
+		return err
 	}
 	now := time.Now()
 	phase.Status = "completed"
 	phase.CompletedAt = &now
-	return nil
+	return m.store.UpdatePhase(ctx, phase)
 }
 
-func (m *Manager) CreateTodo(phaseID, title, description string) *Todo {
+func (m *Manager) CreateTodo(ctx context.Context, phaseID, milestoneID, content, priority string) (*Todo, error) {
 	todo := &Todo{
-		ID:          uuid.New().String(),
+		ID:          "todo_" + uuid.New().String(),
 		PhaseID:     phaseID,
-		Title:       title,
-		Description: description,
+		MilestoneID: milestoneID,
+		Content:     content,
 		Status:      "pending",
-		CreatedAt:   time.Now(),
+		Priority:    priority,
 	}
-	m.todos[todo.ID] = todo
-	return todo
+	if err := m.store.CreateTodo(ctx, todo); err != nil {
+		return nil, err
+	}
+	return todo, nil
 }
 
-func (m *Manager) ListTodos(phaseID string) []*Todo {
-	var result []*Todo
-	for _, t := range m.todos {
-		if t.PhaseID == phaseID {
-			result = append(result, t)
+func (m *Manager) ListTodos(ctx context.Context, milestoneID, phaseID string) ([]Todo, error) {
+	return m.store.ListTodos(ctx, milestoneID, phaseID)
+}
+
+func (m *Manager) CompleteTodo(ctx context.Context, id string) error {
+	todos, err := m.store.ListTodos(ctx, "", "")
+	if err != nil {
+		return err
+	}
+	for _, todo := range todos {
+		if todo.ID == id {
+			now := time.Now()
+			todo.Status = "completed"
+			todo.CompletedAt = &now
+			return m.store.UpdateTodo(ctx, &todo)
 		}
 	}
-	if result == nil {
-		return []*Todo{}
-	}
-	return result
-}
-
-func (m *Manager) CompleteTodo(id string) error {
-	todo, ok := m.todos[id]
-	if !ok {
-		return nil
-	}
-	now := time.Now()
-	todo.Status = "completed"
-	todo.CompletedAt = &now
 	return nil
 }
 
-func (m *Manager) GetRoadmap() *Roadmap {
-	roadmap := &Roadmap{
-		Milestones: make([]Milestone, 0),
-		Phases:     make(map[string][]Phase),
-		Todos:      make(map[string][]Todo),
+func (m *Manager) GetRoadmap(ctx context.Context, milestoneID string) (*Roadmap, error) {
+	milestone, err := m.store.GetMilestone(ctx, milestoneID)
+	if err != nil {
+		return nil, err
 	}
 
-	for _, ms := range m.milestones {
-		roadmap.Milestones = append(roadmap.Milestones, *ms)
+	phases, err := m.store.ListPhases(ctx, milestoneID)
+	if err != nil {
+		return nil, err
 	}
 
-	for _, p := range m.phases {
-		roadmap.Phases[p.MilestoneID] = append(roadmap.Phases[p.MilestoneID], *p)
+	todos, err := m.store.ListTodos(ctx, milestoneID, "")
+	if err != nil {
+		return nil, err
 	}
 
-	for _, t := range m.todos {
-		roadmap.Todos[t.PhaseID] = append(roadmap.Todos[t.PhaseID], *t)
+	completed := 0
+	total := len(phases)
+	for _, p := range phases {
+		if p.Status == "completed" {
+			completed++
+		}
 	}
 
-	return roadmap
+	percent := 0
+	if total > 0 {
+		percent = (completed * 100) / total
+	}
+
+	return &Roadmap{
+		Milestone: *milestone,
+		Phases:    phases,
+		Todos:     todos,
+		Completed: completed,
+		Total:     total,
+		Percent:   percent,
+	}, nil
 }
