@@ -1,8 +1,72 @@
 package skills
 
 import (
+	"fmt"
 	"strings"
 )
+
+type BuiltInCommand struct {
+	Name        string
+	Description string
+	Handler     func(args string) string
+}
+
+var BuiltInCommands []BuiltInCommand
+
+func init() {
+	BuiltInCommands = []BuiltInCommand{
+		{
+			Name:        "help",
+			Description: "Show available commands and usage guide",
+			Handler:     handleHelp,
+		},
+		{
+			Name:        "version",
+			Description: "Show Sentinel AI version",
+			Handler:     handleVersion,
+		},
+		{
+			Name:        "status",
+			Description: "Show current session status",
+			Handler:     handleStatus,
+		},
+		{
+			Name:        "skills",
+			Description: "List all available skills",
+			Handler:     handleSkillsList,
+		},
+	}
+}
+
+func handleHelp(args string) string {
+	if args == "" {
+		var sb strings.Builder
+		sb.WriteString("Available commands:\n")
+		sb.WriteString("  /help [command] - Show all commands or specific command help\n")
+		sb.WriteString("  /version - Show Sentinel AI version\n")
+		sb.WriteString("  /status - Show current session status\n")
+		sb.WriteString("  /skills - List all available skills\n")
+		return sb.String()
+	}
+	for _, bc := range BuiltInCommands {
+		if bc.Name == args {
+			return fmt.Sprintf("  /%s - %s", bc.Name, bc.Description)
+		}
+	}
+	return fmt.Sprintf("Unknown command: %s", args)
+}
+
+func handleVersion(args string) string {
+	return "Sentinel AI v0.1.0\nCommand System: enabled"
+}
+
+func handleStatus(args string) string {
+	return "Session: active\nWorkflow: ready\nSkills: loaded"
+}
+
+func handleSkillsList(args string) string {
+	return "Use GET /api/v1/commands to list all available skills"
+}
 
 type CommandInfo struct {
 	Name        string

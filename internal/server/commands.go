@@ -72,6 +72,12 @@ func (s *Server) commandHandler(w http.ResponseWriter, r *http.Request, _ httpro
 }
 
 func (s *Server) executeCommand(ctx context.Context, cmd string, args map[string]string) (string, error) {
+	for _, bc := range skills.BuiltInCommands {
+		if bc.Name == cmd {
+			return bc.Handler(""), nil
+		}
+	}
+
 	if s.skills == nil {
 		return "", fmt.Errorf("skills registry not available")
 	}
