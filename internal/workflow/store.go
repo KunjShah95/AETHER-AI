@@ -122,19 +122,20 @@ func (s *Store) CreateMilestone(ctx context.Context, m *Milestone) error {
 
 func (s *Store) GetMilestone(ctx context.Context, id string) (*Milestone, error) {
 	var m Milestone
+	var createdAt, updatedAt int64
 	var completedAt *int64
 
 	err := s.db.QueryRowContext(ctx,
 		`SELECT id, name, description, version, status, created_at, updated_at, completed_at
 		 FROM milestones WHERE id = ?`, id).
 		Scan(&m.ID, &m.Name, &m.Description, &m.Version, &m.Status,
-			&m.CreatedAt, &m.UpdatedAt, &completedAt)
+			&createdAt, &updatedAt, &completedAt)
 	if err != nil {
 		return nil, err
 	}
 
-	m.CreatedAt = time.Unix(m.CreatedAt.Unix(), 0)
-	m.UpdatedAt = time.Unix(m.UpdatedAt.Unix(), 0)
+	m.CreatedAt = time.Unix(createdAt, 0)
+	m.UpdatedAt = time.Unix(updatedAt, 0)
 	m.CompletedAt = intToTime(completedAt)
 
 	return &m, nil
@@ -152,13 +153,14 @@ func (s *Store) ListMilestones(ctx context.Context) ([]Milestone, error) {
 	var milestones []Milestone
 	for rows.Next() {
 		var m Milestone
+		var createdAt, updatedAt int64
 		var completedAt *int64
 		if err := rows.Scan(&m.ID, &m.Name, &m.Description, &m.Version, &m.Status,
-			&m.CreatedAt, &m.UpdatedAt, &completedAt); err != nil {
+			&createdAt, &updatedAt, &completedAt); err != nil {
 			return nil, err
 		}
-		m.CreatedAt = time.Unix(m.CreatedAt.Unix(), 0)
-		m.UpdatedAt = time.Unix(m.UpdatedAt.Unix(), 0)
+		m.CreatedAt = time.Unix(createdAt, 0)
+		m.UpdatedAt = time.Unix(updatedAt, 0)
 		m.CompletedAt = intToTime(completedAt)
 		milestones = append(milestones, m)
 	}
@@ -199,6 +201,7 @@ func (s *Store) CreatePhase(ctx context.Context, p *Phase) error {
 
 func (s *Store) GetPhase(ctx context.Context, id string) (*Phase, error) {
 	var p Phase
+	var createdAt, updatedAt int64
 	var completedAt *int64
 	var dependsOnJSON string
 
@@ -206,13 +209,13 @@ func (s *Store) GetPhase(ctx context.Context, id string) (*Phase, error) {
 		`SELECT id, milestone_id, name, description, status, order_num, depends_on, created_at, updated_at, completed_at
 		 FROM phases WHERE id = ?`, id).
 		Scan(&p.ID, &p.MilestoneID, &p.Name, &p.Description, &p.Status, &p.Order, &dependsOnJSON,
-			&p.CreatedAt, &p.UpdatedAt, &completedAt)
+			&createdAt, &updatedAt, &completedAt)
 	if err != nil {
 		return nil, err
 	}
 
-	p.CreatedAt = time.Unix(p.CreatedAt.Unix(), 0)
-	p.UpdatedAt = time.Unix(p.UpdatedAt.Unix(), 0)
+	p.CreatedAt = time.Unix(createdAt, 0)
+	p.UpdatedAt = time.Unix(updatedAt, 0)
 	p.CompletedAt = intToTime(completedAt)
 
 	if err := json.Unmarshal([]byte(dependsOnJSON), &p.DependsOn); err != nil {
@@ -243,14 +246,15 @@ func (s *Store) ListPhases(ctx context.Context, milestoneID string) ([]Phase, er
 	var phases []Phase
 	for rows.Next() {
 		var p Phase
+		var createdAt, updatedAt int64
 		var completedAt *int64
 		var dependsOnJSON string
 		if err := rows.Scan(&p.ID, &p.MilestoneID, &p.Name, &p.Description, &p.Status, &p.Order, &dependsOnJSON,
-			&p.CreatedAt, &p.UpdatedAt, &completedAt); err != nil {
+			&createdAt, &updatedAt, &completedAt); err != nil {
 			return nil, err
 		}
-		p.CreatedAt = time.Unix(p.CreatedAt.Unix(), 0)
-		p.UpdatedAt = time.Unix(p.UpdatedAt.Unix(), 0)
+		p.CreatedAt = time.Unix(createdAt, 0)
+		p.UpdatedAt = time.Unix(updatedAt, 0)
 		p.CompletedAt = intToTime(completedAt)
 		if err := json.Unmarshal([]byte(dependsOnJSON), &p.DependsOn); err != nil {
 			p.DependsOn = []string{}
@@ -317,13 +321,14 @@ func (s *Store) ListTodos(ctx context.Context, milestoneID string, phaseID strin
 	var todos []Todo
 	for rows.Next() {
 		var t Todo
+		var createdAt, updatedAt int64
 		var completedAt *int64
 		if err := rows.Scan(&t.ID, &t.PhaseID, &t.MilestoneID, &t.Content, &t.Status, &t.Priority,
-			&t.CreatedAt, &t.UpdatedAt, &completedAt); err != nil {
+			&createdAt, &updatedAt, &completedAt); err != nil {
 			return nil, err
 		}
-		t.CreatedAt = time.Unix(t.CreatedAt.Unix(), 0)
-		t.UpdatedAt = time.Unix(t.UpdatedAt.Unix(), 0)
+		t.CreatedAt = time.Unix(createdAt, 0)
+		t.UpdatedAt = time.Unix(updatedAt, 0)
 		t.CompletedAt = intToTime(completedAt)
 		todos = append(todos, t)
 	}
