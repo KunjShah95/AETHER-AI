@@ -40,6 +40,7 @@ func main() {
 
 	wfManager := workflow.NewManager(wfStore)
 
+	// Create and start HTTP server
 	httpServer := server.New(cfg, store, wfManager)
 	if err := httpServer.Start(":8080"); err != nil {
 		fmt.Fprintf(os.Stderr, "Error starting server: %v\n", err)

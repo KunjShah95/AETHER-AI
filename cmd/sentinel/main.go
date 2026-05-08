@@ -67,7 +67,6 @@ func startServer(cfg *config.Config) (func() error, string, error) {
 		_ = wfStore.Close()
 		return nil, "", err
 	}
-
 	app := server.New(cfg, store, wfManager)
 	httpServer := &http.Server{
 		Addr:    ":8080",
