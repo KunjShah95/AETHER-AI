@@ -44,9 +44,9 @@ type UpdateSessionConfigRequest struct {
 }
 
 type ModelsResponse struct {
-	Provider string   `json:"provider"`
-	CurrentModel string `json:"current_model,omitempty"`
-	Models   []string `json:"models"`
+	Provider     string   `json:"provider"`
+	CurrentModel string   `json:"current_model,omitempty"`
+	Models       []string `json:"models"`
 }
 
 type modelLister interface {
@@ -81,6 +81,41 @@ type ToolResponse struct {
 	Error    string `json:"error,omitempty"`
 	Approved bool   `json:"approved,omitempty"`
 	Status   string `json:"status,omitempty"`
+}
+
+type CreateMilestoneRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Version     string `json:"version,omitempty"`
+}
+
+type CreateMilestoneResponse struct {
+	MilestoneID string `json:"milestone_id"`
+	Status      string `json:"status"`
+}
+
+type CreatePhaseRequest struct {
+	MilestoneID string `json:"milestone_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Order       int    `json:"order,omitempty"`
+}
+
+type CreatePhaseResponse struct {
+	PhaseID string `json:"phase_id"`
+	Status  string `json:"status"`
+}
+
+type CreateTodoRequest struct {
+	PhaseID     string `json:"phase_id,omitempty"`
+	MilestoneID string `json:"milestone_id"`
+	Content     string `json:"content"`
+	Priority    string `json:"priority,omitempty"`
+}
+
+type CreateTodoResponse struct {
+	TodoID string `json:"todo_id"`
+	Status string `json:"status"`
 }
 
 // Health check endpoint
@@ -467,4 +502,231 @@ func (s *Server) streamHandler(w http.ResponseWriter, r *http.Request, ps httpro
 
 	// TODO: Implement streaming responses
 	fmt.Fprintf(w, "data: {\"message\": \"streaming not yet implemented\"}\n\n")
+}
+
+func (s *Server) createMilestoneHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req CreateMilestoneRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	if req.Name == "" {
+		http.Error(w, "Name is required", http.StatusBadRequest)
+		return
+	}
+
+	milestone, err := s.workflowManager.CreateMilestone(r.Context(), req.Name, req.Description, req.Version)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to create milestone: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(CreateMilestoneResponse{
+		MilestoneID: milestone.ID,
+		Status:      "created",
+	})
+}
+
+func (s *Server) listMilestonesHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	milestones, err := s.workflowManager.ListMilestones(r.Context())
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to list milestones: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(milestones)
+}
+
+func (s *Server) getMilestoneHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	milestoneID := ps.ByName("id")
+	milestone, err := s.workflowManager.GetMilestone(r.Context(), milestoneID)
+	if err != nil {
+		http.Error(w, "Milestone not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(milestone)
+}
+
+func (s *Server) completeMilestoneHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	milestoneID := ps.ByName("id")
+	if err := s.workflowManager.CompleteMilestone(r.Context(), milestoneID); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to complete milestone: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"status": "completed"})
+}
+
+func (s *Server) createPhaseHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req CreatePhaseRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	if req.MilestoneID == "" || req.Name == "" {
+		http.Error(w, "MilestoneID and Name are required", http.StatusBadRequest)
+		return
+	}
+
+	phase, err := s.workflowManager.CreatePhase(r.Context(), req.MilestoneID, req.Name, req.Description, req.Order)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to create phase: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(CreatePhaseResponse{
+		PhaseID: phase.ID,
+		Status:  "created",
+	})
+}
+
+func (s *Server) listPhasesHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	milestoneID := ps.ByName("milestone_id")
+	phases, err := s.workflowManager.ListPhases(r.Context(), milestoneID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to list phases: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(phases)
+}
+
+func (s *Server) completePhaseHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	phaseID := ps.ByName("id")
+	if err := s.workflowManager.CompletePhase(r.Context(), phaseID); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to complete phase: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"status": "completed"})
+}
+
+func (s *Server) createTodoHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req CreateTodoRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	if req.MilestoneID == "" || req.Content == "" {
+		http.Error(w, "MilestoneID and Content are required", http.StatusBadRequest)
+		return
+	}
+
+	priority := req.Priority
+	if priority == "" {
+		priority = "medium"
+	}
+
+	todo, err := s.workflowManager.CreateTodo(r.Context(), req.PhaseID, req.MilestoneID, req.Content, priority)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to create todo: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(CreateTodoResponse{
+		TodoID: todo.ID,
+		Status: "created",
+	})
+}
+
+func (s *Server) listTodosHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	milestoneID := ps.ByName("milestone_id")
+	todos, err := s.workflowManager.ListTodos(r.Context(), milestoneID, "")
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to list todos: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(todos)
+}
+
+func (s *Server) completeTodoHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	todoID := ps.ByName("id")
+	if err := s.workflowManager.CompleteTodo(r.Context(), todoID); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to complete todo: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"status": "completed"})
+}
+
+func (s *Server) getRoadmapHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	milestoneID := ps.ByName("milestone_id")
+	roadmap, err := s.workflowManager.GetRoadmap(r.Context(), milestoneID)
+	if err != nil {
+		http.Error(w, "Milestone not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(roadmap)
 }

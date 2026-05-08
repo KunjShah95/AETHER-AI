@@ -11,6 +11,7 @@ import (
 	"sentinel-ai/internal/server"
 	"sentinel-ai/internal/session"
 	"sentinel-ai/internal/tui"
+	"sentinel-ai/internal/workflow"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -51,14 +52,23 @@ func startServer(cfg *config.Config) (func() error, string, error) {
 		return nil, "", err
 	}
 
-	manager := session.NewManager(store)
-	initialSession, err := manager.CreateSession(context.Background(), "default")
+	wfStore, err := workflow.NewStore("workflow.db")
 	if err != nil {
 		_ = store.Close()
 		return nil, "", err
 	}
 
-	app := server.New(cfg, store)
+	wfManager := workflow.NewManager(wfStore)
+
+	manager := session.NewManager(store)
+	initialSession, err := manager.CreateSession(context.Background(), "default")
+	if err != nil {
+		_ = store.Close()
+		_ = wfStore.Close()
+		return nil, "", err
+	}
+
+	app := server.New(cfg, store, wfManager)
 	httpServer := &http.Server{
 		Addr:    ":8080",
 		Handler: app.Handler(),
@@ -73,6 +83,7 @@ func startServer(cfg *config.Config) (func() error, string, error) {
 	if err := waitForServer("http://127.0.0.1:8080/health", 5*time.Second); err != nil {
 		_ = httpServer.Shutdown(context.Background())
 		_ = store.Close()
+		_ = wfStore.Close()
 		return nil, "", err
 	}
 
@@ -81,8 +92,10 @@ func startServer(cfg *config.Config) (func() error, string, error) {
 		defer cancel()
 		if err := httpServer.Shutdown(ctx); err != nil {
 			_ = store.Close()
+			_ = wfStore.Close()
 			return err
 		}
+		_ = wfStore.Close()
 		return store.Close()
 	}, initialSession.ID, nil
 }
